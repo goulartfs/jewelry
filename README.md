@@ -97,6 +97,7 @@ Total de 9 items
 -----------------------------------------------
 
 Assim sendo, para cada produto temos:
+
     01. Anel Esmeralda - 18 itens - R$ 180,00
     02. Anel Rubi      - 10 itens - R$ 100,00
     03. Anel Diamante  - 09 itens - R$  90,00

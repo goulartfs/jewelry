@@ -22,48 +22,35 @@ onde cada pacote tem o preço total de R$ 100,00 (cem reais).
 Ou seja, cada item possui valor unitário de R$ 10,00 (dez reais).
 
 Catálogo: 
+
     1. Anéis Bafônicos
+    
 Items:
+
     1. Anel Esmeralda
     2. Anel Diamante
     3. Anel Rubi
+    
 Lista de Pedido:
 
-    #. Comprador - Item de Pedido - Qtd     - R$
-    
-    ------------------------------------------
-    
-    1. Ronaldo   - Anel Esmeralda - 2 itens - R$ 20,00
-    
-    2. Maria     - Anel Rubi      - 1 item  - R$ 10,00
-    
-    3. Janio     - Anel Esmeralda - 3 itens - R$ 30,00
-    
-    4. Artur     - Anel Diamante  - 3 itens - R$ 30,00
-    
-    5. Clara     - Anel Diamante  - 3 itens - R$ 30,00
-    
-    6. Leonardo  - Anel Rubi      - 2 itens - R$ 20,00
-    
-    7. Naldo     - Anel Esmeralda - 4 itens - R$ 40,00
-    
-    8. Lea       - Anel Rubi      - 2 itens - R$ 20,00
-    
-    9. Beatriz   - Anel Esmeralda - 3 itens - R$ 30,00
-    
-   10. Daniel    - Anel Diamante  - 1 item  - R$ 10,00
-
-   11. Emerson   - Anel Esmeralda - 1 item  - R$ 10,00
-
-   12. Artur     - Anel Rubi      - 2 itens - R$ 20,00
-
-   13. Clara     - Anel Esmeralda - 4 itens - R$ 40,00
-
-   14. Naldo     - Anel Diamante  - 2 itens - R$ 20,00
-
-   15. Naldo     - Anel Rubi      - 3 itens - R$ 30,00
-
-   16. Artur     - Anel Esmeralda - 1 item  - R$ 10,00
+    #. Comprador  - Item de Pedido - Qtd     - R$
+    ---------------------------------------------------
+    1. Ronaldo    - Anel Esmeralda - 2 itens - R$ 20,00
+    2. Maria      - Anel Rubi      - 1 item  - R$ 10,00
+    3. Janio      - Anel Esmeralda - 3 itens - R$ 30,00
+    4. Artur      - Anel Diamante  - 3 itens - R$ 30,00
+    5. Clara      - Anel Diamante  - 3 itens - R$ 30,00
+    6. Leonardo   - Anel Rubi      - 2 itens - R$ 20,00
+    7. Naldo      - Anel Esmeralda - 4 itens - R$ 40,00
+    8. Lea        - Anel Rubi      - 2 itens - R$ 20,00
+    9. Beatriz    - Anel Esmeralda - 3 itens - R$ 30,00
+    10. Daniel    - Anel Diamante  - 1 item  - R$ 10,00
+    11. Emerson   - Anel Esmeralda - 1 item  - R$ 10,00
+    12. Artur     - Anel Rubi      - 2 itens - R$ 20,00
+    13. Clara     - Anel Esmeralda - 4 itens - R$ 40,00
+    14. Naldo     - Anel Diamante  - 2 itens - R$ 20,00
+    15. Naldo     - Anel Rubi      - 3 itens - R$ 30,00
+    16. Artur     - Anel Esmeralda - 1 item  - R$ 10,00
 
 Ao fim do período de venda, para cada item disponível, 
 será verificado se o total de itens pedidos é suficientes para fechar a compra de todo o pacote.

@@ -14,6 +14,14 @@ class CriarPermissaoDTO(BaseModel):
     descricao: Optional[str] = Field(None, description="Descrição detalhada")
 
 
+class AtualizarPermissaoDTO(BaseModel):
+    """DTO para atualização de uma permissão."""
+
+    nome: Optional[str] = None
+    chave: Optional[str] = None
+    descricao: Optional[str] = None
+
+
 class PermissaoDTO(BaseModel):
     """DTO para retorno de dados de uma permissão."""
 

@@ -829,3 +829,99 @@ GET /permissoes/{id}
       "detail": "Permissão não encontrada"
   }
   ```
+
+### US13: Atualização de Permissão
+
+Endpoint para atualizar os dados de uma permissão existente.
+
+```http
+PUT /permissoes/{id}
+```
+
+**Requisição:**
+```json
+{
+    "nome": "Acesso Total ao Sistema",
+    "chave": "SYSTEM_ACCESS_ALL",
+    "descricao": "Permite acesso total ao sistema e suas configurações"
+}
+```
+
+**Observações:**
+- Todos os campos são opcionais
+- Apenas os campos fornecidos serão atualizados
+- A chave é automaticamente convertida para maiúsculas
+- A chave deve ser única no sistema
+- A chave é utilizada no código para verificação de acesso
+- Requer autenticação e permissões adequadas
+
+**Respostas:**
+- `200 OK`: Permissão atualizada
+  ```json
+  {
+      "id": "123e4567-e89b-12d3-a456-426614174000",
+      "nome": "Acesso Total ao Sistema",
+      "chave": "SYSTEM_ACCESS_ALL",
+      "descricao": "Permite acesso total ao sistema e suas configurações"
+  }
+  ```
+- `404 Not Found`: Permissão não encontrada
+  ```json
+  {
+      "detail": "Permissão não encontrada"
+  }
+  ```
+- `400 Bad Request`: Chave já cadastrada
+  ```json
+  {
+      "detail": "Chave de permissão já cadastrada: SYSTEM_ACCESS_ALL"
+  }
+  ```
+
+### US14: Atualização de Permissão
+
+Endpoint para atualizar os dados de uma permissão existente.
+
+```http
+PUT /permissoes/{id}
+```
+
+**Requisição:**
+```json
+{
+    "nome": "Acesso Total ao Sistema",
+    "chave": "SYSTEM_ACCESS_ALL",
+    "descricao": "Permite acesso total ao sistema e suas configurações"
+}
+```
+
+**Observações:**
+- Todos os campos são opcionais
+- Apenas os campos fornecidos serão atualizados
+- A chave é automaticamente convertida para maiúsculas
+- A chave deve ser única no sistema
+- A chave é utilizada no código para verificação de acesso
+- Requer autenticação e permissões adequadas
+
+**Respostas:**
+- `200 OK`: Permissão atualizada
+  ```json
+  {
+      "id": "123e4567-e89b-12d3-a456-426614174000",
+      "nome": "Acesso Total ao Sistema",
+      "chave": "SYSTEM_ACCESS_ALL",
+      "descricao": "Permite acesso total ao sistema e suas configurações"
+  }
+  ```
+- `404 Not Found`: Permissão não encontrada
+  ```json
+  {
+      "detail": "Permissão não encontrada"
+  }
+  ```
+- `400 Bad Request`: Chave já cadastrada
+  ```json
+  {
+      "detail": "Chave de permissão já cadastrada: SYSTEM_ACCESS_ALL"
+  }
+  ```

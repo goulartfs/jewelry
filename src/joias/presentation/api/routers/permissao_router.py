@@ -4,7 +4,7 @@ Router para endpoints de Permissão.
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 
-from ....application.dtos.permissao import CriarPermissaoDTO, PermissaoDTO
+from ....application.dtos.permissao import CriarPermissaoDTO, PermissaoDTO, AtualizarPermissaoDTO
 from ....application.identity.permissao_service import PermissaoService
 from ....domain.repositories.permissao_repository import IPermissaoRepository
 from ...dependencies import get_permissao_repository
@@ -91,4 +91,35 @@ def listar_permissoes(
         Lista de permissões
     """
     service = PermissaoService(permissao_repository)
-    return service.listar_permissoes() 
+    return service.listar_permissoes()
+
+
+@router.put(
+    "/{id}",
+    response_model=PermissaoDTO,
+    description="Atualiza uma permissão existente",
+)
+def atualizar_permissao(
+    id: str,
+    dados: AtualizarPermissaoDTO,
+    permissao_repository: IPermissaoRepository = Depends(get_permissao_repository),
+) -> PermissaoDTO:
+    """
+    Atualiza uma permissão existente.
+
+    Args:
+        id: ID da permissão
+        dados: Dados da permissão a serem atualizados
+        permissao_repository: Repositório de permissões (injetado)
+
+    Returns:
+        Dados da permissão atualizada
+
+    Raises:
+        HTTPException: Se a permissão não for encontrada ou houver erro de validação
+    """
+    try:
+        service = PermissaoService(permissao_repository)
+        return service.atualizar_permissao(id, dados)
+    except ValueError as e:
+        raise HTTPException(status_code=404 if "não encontrada" in str(e) else 400, detail=str(e)) 

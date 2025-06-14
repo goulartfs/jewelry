@@ -1,1 +1,20 @@
- 
+[run]
+source = src/joias
+omit =
+    src/joias/presentation/api/main.py
+    src/joias/infrastructure/persistence/sqlalchemy/base.py
+    src/joias/infrastructure/persistence/sqlalchemy/models.py
+    src/joias/infrastructure/persistence/sqlalchemy/migrations/*
+    tests/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if self.debug:
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    pass
+    raise ImportError
+    except ImportError:
+    raise AssertionError 

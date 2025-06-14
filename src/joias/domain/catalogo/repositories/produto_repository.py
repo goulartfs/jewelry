@@ -5,8 +5,8 @@ Este módulo define a interface que deve ser implementada por qualquer
 repositório que queira persistir produtos.
 """
 from abc import ABC, abstractmethod
-from typing import List, Optional
 from decimal import Decimal
+from typing import List, Optional
 
 from ..entities.produto import Produto
 
@@ -74,9 +74,7 @@ class ProdutoRepository(ABC):
 
     @abstractmethod
     def buscar_por_faixa_de_preco(
-        self,
-        preco_minimo: Decimal,
-        preco_maximo: Decimal
+        self, preco_minimo: Decimal, preco_maximo: Decimal
     ) -> List[Produto]:
         """
         Busca produtos por faixa de preço.
@@ -114,4 +112,4 @@ class ProdutoRepository(ABC):
         Returns:
             bool: True se removido com sucesso, False caso contrário
         """
-        pass 
+        pass

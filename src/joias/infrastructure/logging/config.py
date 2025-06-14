@@ -7,7 +7,7 @@ handlers e níveis de log para diferentes ambientes.
 import logging
 import logging.config
 import os
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 def get_logging_config() -> Dict[str, Any]:
@@ -106,4 +106,4 @@ def setup_logging() -> None:
 
     # Cria o logger principal da aplicação
     logger = logging.getLogger("joias")
-    logger.info("Logging configurado com sucesso") 
+    logger.info("Logging configurado com sucesso")

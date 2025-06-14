@@ -8,13 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from ...infrastructure.logging.config import setup_logging
-from .routers import (
-    auth,
-    users,
-    products,
-    orders,
-    suppliers
-)
+from .routers import auth, orders, products, suppliers, users
 
 
 def create_app() -> FastAPI:
@@ -53,4 +47,4 @@ def create_app() -> FastAPI:
     return app
 
 
-app = create_app() 
+app = create_app()

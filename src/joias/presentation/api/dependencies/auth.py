@@ -9,16 +9,15 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from ....infrastructure.persistence.sqlalchemy.session import get_db
 from ....application.identity.auth_service import AuthService
 from ....domain.identity.entities.usuario import Usuario
+from ....infrastructure.persistence.sqlalchemy.session import get_db
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db)
+    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
 ) -> Usuario:
     """
     Retorna o usuário atual baseado no token JWT.
@@ -43,9 +42,7 @@ async def get_current_user(
 
     try:
         payload = jwt.decode(
-            token,
-            auth_service.secret_key,
-            algorithms=[auth_service.algorithm]
+            token, auth_service.secret_key, algorithms=[auth_service.algorithm]
         )
         user_id: str = payload.get("sub")
         if user_id is None:
@@ -59,15 +56,14 @@ async def get_current_user(
 
     if not user.ativo:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Usuário inativo"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Usuário inativo"
         )
 
     return user
 
 
 async def get_current_active_user(
-    current_user: Usuario = Depends(get_current_user)
+    current_user: Usuario = Depends(get_current_user),
 ) -> Usuario:
     """
     Retorna o usuário atual se estiver ativo.
@@ -83,7 +79,6 @@ async def get_current_active_user(
     """
     if not current_user.ativo:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Usuário inativo"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Usuário inativo"
         )
-    return current_user 
+    return current_user

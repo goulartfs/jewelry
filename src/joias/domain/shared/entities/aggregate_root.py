@@ -16,35 +16,35 @@ from ..events.domain_event import DomainEvent
 class AggregateRoot(ABC):
     """
     Classe base para agregados do domínio.
-    
+
     Esta classe fornece funcionalidades comuns a todos os
     agregados, como identidade e eventos de domínio.
     """
-    
+
     def __init__(self) -> None:
         """Inicializa um novo agregado."""
         self._id = uuid4()
         self._eventos: List[object] = []
-        
+
     @property
     def id(self) -> UUID:
         """Retorna o ID do agregado."""
         return self._id
-        
+
     @property
     def eventos(self) -> List[object]:
         """Retorna os eventos pendentes do agregado."""
         return self._eventos.copy()
-        
+
     def adicionar_evento(self, evento: object) -> None:
         """
         Adiciona um evento ao agregado.
-        
+
         Args:
             evento: O evento a ser adicionado
         """
         self._eventos.append(evento)
-        
+
     def limpar_eventos(self) -> None:
         """Limpa a lista de eventos pendentes."""
         self._eventos.clear()
@@ -52,7 +52,7 @@ class AggregateRoot(ABC):
     def add_domain_event(self, event: DomainEvent) -> None:
         """
         Adiciona um novo evento de domínio à lista de eventos pendentes.
-        
+
         Args:
             event: O evento de domínio a ser adicionado.
         """
@@ -93,4 +93,4 @@ class AggregateRoot(ABC):
         """
         if not isinstance(other, AggregateRoot):
             return NotImplemented
-        return self.id == other.id 
+        return self.id == other.id

@@ -6,11 +6,11 @@ e os modelos SQLAlchemy para fornecedores.
 """
 from typing import List
 
-from .....domain.catalogo.entities.fornecedor import Fornecedor as FornecedorEntity
 from .....domain.catalogo.entities.fornecedor import Documento as DocumentoEntity
+from .....domain.catalogo.entities.fornecedor import Fornecedor as FornecedorEntity
 from .....domain.shared.value_objects.endereco import Endereco
-from ..models.fornecedor import Fornecedor as FornecedorModel
 from ..models.fornecedor import Documento as DocumentoModel
+from ..models.fornecedor import Fornecedor as FornecedorModel
 
 
 def to_entity(model: FornecedorModel) -> FornecedorEntity:
@@ -24,11 +24,7 @@ def to_entity(model: FornecedorModel) -> FornecedorEntity:
         FornecedorEntity: A entidade de domínio correspondente
     """
     documentos = [
-        DocumentoEntity(
-            numero=d.numero,
-            tipo=d.tipo
-        )
-        for d in model.documentos
+        DocumentoEntity(numero=d.numero, tipo=d.tipo) for d in model.documentos
     ]
 
     endereco = Endereco(
@@ -39,13 +35,11 @@ def to_entity(model: FornecedorModel) -> FornecedorEntity:
         estado=model.estado,
         cep=model.cep,
         complemento=model.complemento,
-        pais=model.pais
+        pais=model.pais,
     )
 
     fornecedor = FornecedorEntity(
-        nome=model.nome,
-        documentos=documentos,
-        endereco=endereco
+        nome=model.nome, documentos=documentos, endereco=endereco
     )
 
     # Atributos que não fazem parte do construtor
@@ -74,15 +68,11 @@ def to_model(entity: FornecedorEntity) -> FornecedorModel:
         cep=entity.endereco.cep,
         complemento=entity.endereco.complemento,
         pais=entity.endereco.pais,
-        ativo=entity.ativo
+        ativo=entity.ativo,
     )
 
     model.documentos = [
-        DocumentoModel(
-            numero=d.numero,
-            tipo=d.tipo
-        )
-        for d in entity.documentos
+        DocumentoModel(numero=d.numero, tipo=d.tipo) for d in entity.documentos
     ]
 
     return model
@@ -110,11 +100,9 @@ def update_model(model: FornecedorModel, entity: FornecedorEntity) -> None:
     # Atualiza documentos
     # Remove documentos que não existem mais na entidade
     model.documentos = [
-        d for d in model.documentos
-        if any(
-            d.numero == ed.numero and d.tipo == ed.tipo
-            for ed in entity.documentos
-        )
+        d
+        for d in model.documentos
+        if any(d.numero == ed.numero and d.tipo == ed.tipo for ed in entity.documentos)
     ]
 
     # Adiciona novos documentos
@@ -124,8 +112,5 @@ def update_model(model: FornecedorModel, entity: FornecedorEntity) -> None:
             for d in model.documentos
         ):
             model.documentos.append(
-                DocumentoModel(
-                    numero=doc_entity.numero,
-                    tipo=doc_entity.tipo
-                )
-            ) 
+                DocumentoModel(numero=doc_entity.numero, tipo=doc_entity.tipo)
+            )

@@ -7,17 +7,17 @@ e o domínio.
 """
 from typing import List, Optional
 
-from ....domain.catalogo.entities.fornecedor import Fornecedor, Documento
+from ....domain.catalogo.entities.fornecedor import Documento, Fornecedor
 from ....domain.catalogo.repositories.fornecedor_repository import FornecedorRepository
 from ....domain.catalogo.services.fornecedor_service import FornecedorService
 from ....domain.shared.value_objects.endereco import Endereco
 from ..dtos.fornecedor_dto import (
-    FornecedorDTO,
-    CriarFornecedorDTO,
     AtualizarFornecedorDTO,
-    ListagemFornecedorDTO,
+    CriarFornecedorDTO,
     DocumentoDTO,
-    EnderecoDTO
+    EnderecoDTO,
+    FornecedorDTO,
+    ListagemFornecedorDTO,
 )
 
 
@@ -29,10 +29,7 @@ class FornecedorAppService:
     coordenando as operações entre a interface com o usuário e o domínio.
     """
 
-    def __init__(
-        self,
-        fornecedor_repository: FornecedorRepository
-    ):
+    def __init__(self, fornecedor_repository: FornecedorRepository):
         """
         Inicializa o serviço com suas dependências.
 
@@ -55,25 +52,18 @@ class FornecedorAppService:
         Raises:
             ValueError: Se já existe um fornecedor com o mesmo documento
         """
-        documento = Documento(
-            numero=dto.documento_numero,
-            tipo=dto.documento_tipo
-        )
+        documento = Documento(numero=dto.documento_numero, tipo=dto.documento_tipo)
 
         endereco = self._to_endereco_entity(dto.endereco)
 
         fornecedor = self._service.criar_fornecedor(
-            nome=dto.nome,
-            documento=documento,
-            endereco=endereco
+            nome=dto.nome, documento=documento, endereco=endereco
         )
 
         return self._to_dto(fornecedor)
 
     def atualizar_fornecedor(
-        self,
-        fornecedor_id: int,
-        dto: AtualizarFornecedorDTO
+        self, fornecedor_id: int, dto: AtualizarFornecedorDTO
     ) -> Optional[FornecedorDTO]:
         """
         Atualiza um fornecedor existente.
@@ -180,10 +170,7 @@ class FornecedorAppService:
         return FornecedorDTO(
             nome=fornecedor.nome,
             documentos=[
-                DocumentoDTO(
-                    numero=d.numero,
-                    tipo=d.tipo
-                )
+                DocumentoDTO(numero=d.numero, tipo=d.tipo)
                 for d in fornecedor.documentos
             ],
             endereco=EnderecoDTO(
@@ -194,9 +181,9 @@ class FornecedorAppService:
                 estado=fornecedor.endereco.estado,
                 cep=fornecedor.endereco.cep,
                 complemento=fornecedor.endereco.complemento,
-                pais=fornecedor.endereco.pais
+                pais=fornecedor.endereco.pais,
             ),
-            ativo=fornecedor.ativo
+            ativo=fornecedor.ativo,
         )
 
     def _to_listagem_dto(self, fornecedor: Fornecedor) -> ListagemFornecedorDTO:
@@ -213,11 +200,11 @@ class FornecedorAppService:
             nome=fornecedor.nome,
             documento_principal=DocumentoDTO(
                 numero=fornecedor.documentos[0].numero,
-                tipo=fornecedor.documentos[0].tipo
+                tipo=fornecedor.documentos[0].tipo,
             ),
             cidade=fornecedor.endereco.cidade,
             estado=fornecedor.endereco.estado,
-            ativo=fornecedor.ativo
+            ativo=fornecedor.ativo,
         )
 
     def _to_endereco_entity(self, dto: EnderecoDTO) -> Endereco:
@@ -238,5 +225,5 @@ class FornecedorAppService:
             estado=dto.estado,
             cep=dto.cep,
             complemento=dto.complemento,
-            pais=dto.pais
-        ) 
+            pais=dto.pais,
+        )

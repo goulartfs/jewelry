@@ -8,16 +8,11 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import List, Optional
 
-from ...domain.entities.produto import (
-    Produto,
-    Variacao,
-    Detalhe,
-    Preco
-)
+from ...domain.entities.produto import Detalhe, Preco, Produto, Variacao
 from ...domain.repositories.produto import (
+    DetalheRepository,
     ProdutoRepository,
     VariacaoRepository,
-    DetalheRepository
 )
 from .base import UseCase
 
@@ -25,6 +20,7 @@ from .base import UseCase
 @dataclass
 class CriarProdutoInput:
     """Dados de entrada para criação de produto."""
+
     nome: str
     descricao: str
     codigo: str
@@ -61,7 +57,7 @@ class CriarProdutoUseCase(UseCase[CriarProdutoInput, Produto]):
             codigo=input_data.codigo,
             preco=Preco(valor=input_data.preco),
             detalhes=input_data.detalhes or [],
-            variacoes=input_data.variacoes or []
+            variacoes=input_data.variacoes or [],
         )
 
         return self.produto_repository.criar(produto)
@@ -70,6 +66,7 @@ class CriarProdutoUseCase(UseCase[CriarProdutoInput, Produto]):
 @dataclass
 class AtualizarProdutoInput:
     """Dados de entrada para atualização de produto."""
+
     id: int
     nome: Optional[str] = None
     descricao: Optional[str] = None
@@ -135,6 +132,7 @@ class DeletarProdutoUseCase(UseCase[int, None]):
 @dataclass
 class AdicionarVariacaoInput:
     """Dados de entrada para adicionar variação a um produto."""
+
     produto_id: int
     nome: str
     descricao: str
@@ -148,7 +146,7 @@ class AdicionarVariacaoUseCase(UseCase[AdicionarVariacaoInput, Produto]):
     def __init__(
         self,
         produto_repository: ProdutoRepository,
-        variacao_repository: VariacaoRepository
+        variacao_repository: VariacaoRepository,
     ):
         self.produto_repository = produto_repository
         self.variacao_repository = variacao_repository
@@ -177,7 +175,7 @@ class AdicionarVariacaoUseCase(UseCase[AdicionarVariacaoInput, Produto]):
             nome=input_data.nome,
             descricao=input_data.descricao,
             codigo=input_data.codigo,
-            detalhes=input_data.detalhes or []
+            detalhes=input_data.detalhes or [],
         )
 
         produto.adicionar_variacao(variacao)
@@ -187,6 +185,7 @@ class AdicionarVariacaoUseCase(UseCase[AdicionarVariacaoInput, Produto]):
 @dataclass
 class AdicionarDetalheInput:
     """Dados de entrada para adicionar detalhe a um produto."""
+
     produto_id: int
     nome: str
     valor: str
@@ -217,9 +216,7 @@ class AdicionarDetalheUseCase(UseCase[AdicionarDetalheInput, Produto]):
             raise ValueError("Produto não encontrado")
 
         detalhe = Detalhe(
-            nome=input_data.nome,
-            valor=input_data.valor,
-            tipo=input_data.tipo
+            nome=input_data.nome, valor=input_data.valor, tipo=input_data.tipo
         )
 
         produto.adicionar_detalhe(detalhe)
@@ -242,4 +239,4 @@ class BuscarProdutosUseCase(UseCase[str, List[Produto]]):
         Returns:
             Lista de produtos encontrados
         """
-        return self.produto_repository.buscar_por_nome(nome) 
+        return self.produto_repository.buscar_por_nome(nome)

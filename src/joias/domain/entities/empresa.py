@@ -14,10 +14,11 @@ from .dados_pessoais import Endereco
 class Empresa(Entity):
     """
     Entidade que representa uma empresa.
-    
+
     Uma empresa é uma organização que pode estar associada a um
     ou mais usuários do sistema.
     """
+
     razao_social: str
     nome_fantasia: str
     cnpj: str
@@ -45,6 +46,6 @@ class Empresa(Entity):
         documentos = [
             f"CNPJ: {self.cnpj}",
             f"IE: {self.inscricao_estadual}" if self.inscricao_estadual else None,
-            f"IM: {self.inscricao_municipal}" if self.inscricao_municipal else None
+            f"IM: {self.inscricao_municipal}" if self.inscricao_municipal else None,
         ]
-        return " / ".join(d for d in documentos if d) 
+        return " / ".join(d for d in documentos if d)

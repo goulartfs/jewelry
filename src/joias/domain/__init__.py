@@ -14,12 +14,7 @@ Bounded Contexts:
 
 from .shared.entities.aggregate_root import AggregateRoot
 from .shared.events.domain_event import DomainEvent
-from .shared.value_objects.value_object import ValueObject
 from .shared.repositories.repository import Repository
+from .shared.value_objects.value_object import ValueObject
 
-__all__ = [
-    'AggregateRoot',
-    'DomainEvent',
-    'ValueObject',
-    'Repository'
-] 
+__all__ = ["AggregateRoot", "DomainEvent", "ValueObject", "Repository"]

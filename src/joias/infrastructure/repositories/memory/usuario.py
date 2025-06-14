@@ -14,7 +14,7 @@ from .base import MemoryRepository
 class MemoryUsuarioRepository(MemoryRepository[Usuario], UsuarioRepository):
     """
     Implementação do repositório de usuários em memória.
-    
+
     Esta implementação é útil para testes e desenvolvimento.
     """
 
@@ -28,10 +28,7 @@ class MemoryUsuarioRepository(MemoryRepository[Usuario], UsuarioRepository):
         Returns:
             O usuário encontrado ou None se não existir
         """
-        return next(
-            (u for u in self._items.values() if u.username == username),
-            None
-        )
+        return next((u for u in self._items.values() if u.username == username), None)
 
     def buscar_por_email(self, email: str) -> Optional[Usuario]:
         """
@@ -43,10 +40,7 @@ class MemoryUsuarioRepository(MemoryRepository[Usuario], UsuarioRepository):
         Returns:
             O usuário encontrado ou None se não existir
         """
-        return next(
-            (u for u in self._items.values() if u.email == email),
-            None
-        )
+        return next((u for u in self._items.values() if u.email == email), None)
 
     def buscar_por_empresa(self, empresa_id: int) -> List[Usuario]:
         """
@@ -59,6 +53,5 @@ class MemoryUsuarioRepository(MemoryRepository[Usuario], UsuarioRepository):
             Lista de usuários da empresa
         """
         return [
-            u for u in self._items.values()
-            if u.empresa and u.empresa.id == empresa_id
-        ] 
+            u for u in self._items.values() if u.empresa and u.empresa.id == empresa_id
+        ]

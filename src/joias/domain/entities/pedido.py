@@ -11,13 +11,14 @@ from enum import Enum
 from typing import List, Optional
 
 from .base import Entity
+from .dados_pessoais import Endereco
 from .produto import Produto, Variacao
 from .usuario import Usuario
-from .dados_pessoais import Endereco
 
 
 class StatusPedido(Enum):
     """Enumeração dos possíveis status de um pedido."""
+
     RASCUNHO = "rascunho"
     AGUARDANDO_PAGAMENTO = "aguardando_pagamento"
     PAGO = "pago"
@@ -32,10 +33,11 @@ class StatusPedido(Enum):
 class ItemPedido(Entity):
     """
     Entidade que representa um item de pedido.
-    
+
     Um item de pedido é um produto específico com sua
     quantidade e preço no momento da compra.
     """
+
     produto: Produto
     quantidade: int
     preco_unitario: Decimal
@@ -57,10 +59,11 @@ class ItemPedido(Entity):
 class Pedido(Entity):
     """
     Entidade que representa um pedido.
-    
+
     Um pedido é uma solicitação de compra feita por um cliente,
     contendo um ou mais itens.
     """
+
     cliente: Usuario
     status: StatusPedido = StatusPedido.RASCUNHO
     data_criacao: datetime = field(default_factory=datetime.now)
@@ -87,10 +90,7 @@ class Pedido(Entity):
         Args:
             item_id: ID do item a ser removido
         """
-        self.itens = [
-            i for i in self.itens
-            if i.id != item_id
-        ]
+        self.itens = [i for i in self.itens if i.id != item_id]
         self.atualizar()
 
     def atualizar_status(self, novo_status: StatusPedido) -> None:
@@ -141,7 +141,4 @@ class Pedido(Entity):
         Returns:
             True se o pedido pode ser modificado, False caso contrário
         """
-        return self.status in [
-            StatusPedido.RASCUNHO,
-            StatusPedido.AGUARDANDO_PAGAMENTO
-        ] 
+        return self.status in [StatusPedido.RASCUNHO, StatusPedido.AGUARDANDO_PAGAMENTO]

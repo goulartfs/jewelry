@@ -43,9 +43,7 @@ class PedidoRepository(Repository[Pedido]):
 
     @abstractmethod
     def buscar_por_periodo(
-        self,
-        data_inicio: datetime,
-        data_fim: datetime
+        self, data_inicio: datetime, data_fim: datetime
     ) -> List[Pedido]:
         """
         Busca pedidos em um período específico.
@@ -93,4 +91,4 @@ class PedidoRepository(Repository[Pedido]):
         Returns:
             Lista de pedidos ativos
         """
-        pass 
+        pass

@@ -4,27 +4,28 @@ Testes para os casos de uso de pedidos.
 Este módulo contém os testes unitários para os casos de uso
 relacionados a pedidos.
 """
-import pytest
 from datetime import datetime, timedelta
 from decimal import Decimal
 
-from ..domain.entities.pedido import Pedido, StatusPedido
-from ..domain.entities.usuario import Usuario
-from ..domain.entities.autorizacao import Perfil, Permissao
-from ..domain.entities.dados_pessoais import DadoPessoal, Endereco
-from ..domain.entities.produto import Produto, Preco
+import pytest
+
 from ..application.use_cases.pedido import (
-    CriarPedidoInput,
-    CriarPedidoUseCase,
     AdicionarItemInput,
     AdicionarItemUseCase,
     AtualizarPedidoInput,
     AtualizarPedidoUseCase,
     AtualizarStatusInput,
     AtualizarStatusUseCase,
+    CriarPedidoInput,
+    CriarPedidoUseCase,
+    ListarPedidosAtivosUseCase,
     ListarPedidosClienteUseCase,
-    ListarPedidosAtivosUseCase
 )
+from ..domain.entities.autorizacao import Perfil, Permissao
+from ..domain.entities.dados_pessoais import DadoPessoal, Endereco
+from ..domain.entities.pedido import Pedido, StatusPedido
+from ..domain.entities.produto import Preco, Produto
+from ..domain.entities.usuario import Usuario
 from ..infrastructure.repositories.memory.pedido import MemoryPedidoRepository
 from ..infrastructure.repositories.memory.produto import MemoryProdutoRepository
 
@@ -50,7 +51,7 @@ def endereco():
         bairro="Centro",
         cidade="São Paulo",
         estado="SP",
-        cep="01234-567"
+        cep="01234-567",
     )
 
 
@@ -58,21 +59,25 @@ def endereco():
 def cliente(endereco):
     """Fixture que cria um cliente."""
     permissoes = [
-        Permissao(nome="Criar Pedido", descricao="Pode criar pedidos", codigo="CRIAR_PEDIDO")
+        Permissao(
+            nome="Criar Pedido", descricao="Pode criar pedidos", codigo="CRIAR_PEDIDO"
+        )
     ]
-    perfil = Perfil(nome="Cliente", descricao="Perfil de cliente", permissoes=permissoes)
+    perfil = Perfil(
+        nome="Cliente", descricao="Perfil de cliente", permissoes=permissoes
+    )
     dados_pessoais = DadoPessoal(
         nome="João Silva",
         cpf="123.456.789-00",
         data_nascimento=datetime(1990, 1, 1),
-        enderecos=[endereco]
+        enderecos=[endereco],
     )
     return Usuario(
         username="joao.silva",
         email="joao.silva@example.com",
         senha_hash="senha123",
         perfil=perfil,
-        dados_pessoais=dados_pessoais
+        dados_pessoais=dados_pessoais,
     )
 
 
@@ -83,7 +88,7 @@ def produto():
         nome="Anel Solitário",
         descricao="Anel solitário em ouro 18k",
         codigo="ANL-001",
-        preco=Preco(valor=Decimal("1000.00"))
+        preco=Preco(valor=Decimal("1000.00")),
     )
 
 
@@ -93,7 +98,7 @@ def test_criar_pedido(pedido_repository, cliente, endereco):
     input_data = CriarPedidoInput(
         cliente=cliente,
         endereco_entrega=endereco,
-        observacoes="Entregar no período da tarde"
+        observacoes="Entregar no período da tarde",
     )
 
     pedido = use_case.execute(input_data)
@@ -114,12 +119,12 @@ def test_adicionar_item(pedido_repository, produto_repository, cliente, produto)
     produto = produto_repository.criar(produto)
 
     # Adiciona um item ao pedido
-    adicionar_item_use_case = AdicionarItemUseCase(pedido_repository, produto_repository)
-    pedido_atualizado = adicionar_item_use_case.execute(AdicionarItemInput(
-        pedido_id=pedido.id,
-        produto_id=produto.id,
-        quantidade=1
-    ))
+    adicionar_item_use_case = AdicionarItemUseCase(
+        pedido_repository, produto_repository
+    )
+    pedido_atualizado = adicionar_item_use_case.execute(
+        AdicionarItemInput(pedido_id=pedido.id, produto_id=produto.id, quantidade=1)
+    )
 
     assert len(pedido_atualizado.itens) == 1
     assert pedido_atualizado.itens[0].produto == produto
@@ -135,11 +140,13 @@ def test_atualizar_pedido(pedido_repository, cliente, endereco):
 
     # Atualiza o pedido
     atualizar_use_case = AtualizarPedidoUseCase(pedido_repository)
-    pedido_atualizado = atualizar_use_case.execute(AtualizarPedidoInput(
-        id=pedido.id,
-        endereco_entrega=endereco,
-        observacoes="Entregar no período da tarde"
-    ))
+    pedido_atualizado = atualizar_use_case.execute(
+        AtualizarPedidoInput(
+            id=pedido.id,
+            endereco_entrega=endereco,
+            observacoes="Entregar no período da tarde",
+        )
+    )
 
     assert pedido_atualizado.endereco_entrega == endereco
     assert pedido_atualizado.observacoes == "Entregar no período da tarde"
@@ -153,10 +160,11 @@ def test_atualizar_status(pedido_repository, cliente):
 
     # Atualiza o status do pedido
     atualizar_use_case = AtualizarStatusUseCase(pedido_repository)
-    pedido_atualizado = atualizar_use_case.execute(AtualizarStatusInput(
-        pedido_id=pedido.id,
-        novo_status=StatusPedido.AGUARDANDO_PAGAMENTO
-    ))
+    pedido_atualizado = atualizar_use_case.execute(
+        AtualizarStatusInput(
+            pedido_id=pedido.id, novo_status=StatusPedido.AGUARDANDO_PAGAMENTO
+        )
+    )
 
     assert pedido_atualizado.status == StatusPedido.AGUARDANDO_PAGAMENTO
 
@@ -165,7 +173,7 @@ def test_listar_pedidos_cliente(pedido_repository, cliente):
     """Testa a listagem de pedidos de um cliente."""
     # Cria alguns pedidos
     criar_use_case = CriarPedidoUseCase(pedido_repository)
-    
+
     # Pedido 1
     criar_use_case.execute(CriarPedidoInput(cliente=cliente))
 
@@ -185,31 +193,32 @@ def test_listar_pedidos_ativos(pedido_repository, cliente):
     # Cria alguns pedidos
     criar_use_case = CriarPedidoUseCase(pedido_repository)
     atualizar_status_use_case = AtualizarStatusUseCase(pedido_repository)
-    
+
     # Pedido 1 - Ativo (AGUARDANDO_PAGAMENTO)
     pedido1 = criar_use_case.execute(CriarPedidoInput(cliente=cliente))
-    atualizar_status_use_case.execute(AtualizarStatusInput(
-        pedido_id=pedido1.id,
-        novo_status=StatusPedido.AGUARDANDO_PAGAMENTO
-    ))
+    atualizar_status_use_case.execute(
+        AtualizarStatusInput(
+            pedido_id=pedido1.id, novo_status=StatusPedido.AGUARDANDO_PAGAMENTO
+        )
+    )
 
     # Pedido 2 - Ativo (EM_PRODUCAO)
     pedido2 = criar_use_case.execute(CriarPedidoInput(cliente=cliente))
-    atualizar_status_use_case.execute(AtualizarStatusInput(
-        pedido_id=pedido2.id,
-        novo_status=StatusPedido.EM_PRODUCAO
-    ))
+    atualizar_status_use_case.execute(
+        AtualizarStatusInput(pedido_id=pedido2.id, novo_status=StatusPedido.EM_PRODUCAO)
+    )
 
     # Pedido 3 - Inativo (ENTREGUE)
     pedido3 = criar_use_case.execute(CriarPedidoInput(cliente=cliente))
-    atualizar_status_use_case.execute(AtualizarStatusInput(
-        pedido_id=pedido3.id,
-        novo_status=StatusPedido.ENTREGUE
-    ))
+    atualizar_status_use_case.execute(
+        AtualizarStatusInput(pedido_id=pedido3.id, novo_status=StatusPedido.ENTREGUE)
+    )
 
     # Lista os pedidos ativos
     listar_use_case = ListarPedidosAtivosUseCase(pedido_repository)
     pedidos = listar_use_case.execute()
 
     assert len(pedidos) == 2
-    assert all(p.status not in {StatusPedido.CANCELADO, StatusPedido.ENTREGUE} for p in pedidos) 
+    assert all(
+        p.status not in {StatusPedido.CANCELADO, StatusPedido.ENTREGUE} for p in pedidos
+    )

@@ -5,13 +5,13 @@ Este módulo define a estrutura e comportamento de uma lista de compras,
 que pode ser posteriormente convertida em um pedido.
 """
 from dataclasses import dataclass, field
-from typing import List, Optional, Dict
 from datetime import datetime
-from uuid import UUID, uuid4
 from decimal import Decimal
+from typing import Dict, List, Optional
+from uuid import UUID, uuid4
 
-from .item import Item
 from ...shared.value_objects.preco import Preco
+from .item import Item
 
 
 @dataclass
@@ -31,6 +31,7 @@ class ListaDeCompra:
         data_atualizacao: Data da última atualização
         notas: Observações gerais sobre a lista
     """
+
     nome: str
     items: List[Item] = field(default_factory=list)
     id: UUID = field(default_factory=uuid4)
@@ -60,7 +61,7 @@ class ListaDeCompra:
         """
         if item not in self.items:
             raise ValueError("Item não encontrado na lista")
-        
+
         self.items.remove(item)
         self._atualizar()
 
@@ -77,7 +78,7 @@ class ListaDeCompra:
         """
         if item not in self.items:
             raise ValueError("Item não encontrado na lista")
-        
+
         if nova_quantidade <= 0:
             self.remover_item(item)
         else:
@@ -98,7 +99,7 @@ class ListaDeCompra:
         """
         if item not in self.items:
             raise ValueError("Item não encontrado na lista")
-        
+
         idx = self.items.index(item)
         self.items[idx].aplicar_desconto(percentual)
         self._atualizar()
@@ -115,7 +116,7 @@ class ListaDeCompra:
         """
         if item not in self.items:
             raise ValueError("Item não encontrado na lista")
-        
+
         idx = self.items.index(item)
         self.items[idx].remover_desconto()
         self._atualizar()
@@ -133,7 +134,7 @@ class ListaDeCompra:
         """
         if item not in self.items:
             raise ValueError("Item não encontrado na lista")
-        
+
         idx = self.items.index(item)
         self.items[idx].adicionar_nota(nota)
         self._atualizar()
@@ -215,14 +216,14 @@ class ListaDeCompra:
         linhas = [f"Lista de Compras: {self.nome} ({self.id})"]
         if self.notas:
             linhas.append(f"Notas: {self.notas}")
-        
+
         for item in self.items:
             linhas.append(f"- {item}")
-        
+
         if self.total:
             if self.total_descontos:
                 linhas.append(f"Subtotal: {self.subtotal}")
                 linhas.append(f"Descontos: -{self.total_descontos}")
             linhas.append(f"Total: {self.total}")
-        
-        return "\n".join(linhas) 
+
+        return "\n".join(linhas)

@@ -6,6 +6,7 @@ e serialização de dados de usuários na API.
 """
 from datetime import datetime
 from typing import List, Optional
+
 from pydantic import BaseModel, EmailStr, constr
 
 
@@ -70,6 +71,7 @@ class UserResponse(UserBase):
 
     class Config:
         """Configuração do Pydantic."""
+
         orm_mode = True
 
 
@@ -87,4 +89,4 @@ class UserList(BaseModel):
     items: List[UserResponse]
     total: int
     skip: int
-    limit: int 
+    limit: int

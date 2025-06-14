@@ -51,4 +51,4 @@ class UsuarioRepository(Repository[Usuario]):
         Returns:
             Lista de usuários da empresa
         """
-        pass 
+        pass

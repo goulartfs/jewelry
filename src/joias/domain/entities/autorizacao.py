@@ -14,10 +14,11 @@ from .base import Entity
 class Permissao(Entity):
     """
     Entidade que representa uma permissão no sistema.
-    
+
     Uma permissão define uma ação específica que pode ser executada
     por um usuário que possui essa permissão através de seu perfil.
     """
+
     nome: str
     descricao: str
     codigo: str
@@ -35,10 +36,11 @@ class Permissao(Entity):
 class Perfil(Entity):
     """
     Entidade que representa um perfil de usuário.
-    
+
     Um perfil é um conjunto de permissões que define o que um
     usuário pode ou não fazer no sistema.
     """
+
     nome: str
     descricao: str
     permissoes: List[Permissao] = field(default_factory=list)
@@ -75,7 +77,4 @@ class Perfil(Entity):
         Returns:
             True se o perfil tem a permissão, False caso contrário
         """
-        return any(
-            p.codigo == codigo_permissao
-            for p in self.permissoes
-        ) 
+        return any(p.codigo == codigo_permissao for p in self.permissoes)

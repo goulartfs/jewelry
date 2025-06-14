@@ -4,17 +4,17 @@ Mapeador entre entidades de domínio e modelos SQLAlchemy para produtos.
 Este módulo é responsável por converter entre as entidades de domínio
 e os modelos SQLAlchemy para produtos.
 """
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
 
-from .....domain.catalogo.entities.produto import Produto, Variacao, Detalhe
-from .....domain.shared.value_objects.preco import Preco
+from .....domain.catalogo.entities.produto import Detalhe, Produto, Variacao
 from .....domain.shared.value_objects.moeda import Moeda
+from .....domain.shared.value_objects.preco import Preco
 from ..models.produto import (
+    DetalheModel,
+    DetalheVariacaoModel,
     ProdutoModel,
     VariacaoModel,
-    DetalheModel,
-    DetalheVariacaoModel
 )
 
 
@@ -45,20 +45,14 @@ class ProdutoMapper:
             preco_data_inicio=entity.preco.data_inicio,
             preco_data_fim=entity.preco.data_fim,
             data_criacao=entity.data_criacao,
-            ativo=entity.ativo
+            ativo=entity.ativo,
         )
 
         # Converte variações
-        model.variacoes = [
-            self._variacao_to_model(v, model)
-            for v in entity.variacoes
-        ]
+        model.variacoes = [self._variacao_to_model(v, model) for v in entity.variacoes]
 
         # Converte detalhes
-        model.detalhes = [
-            self._detalhe_to_model(d, model)
-            for d in entity.detalhes
-        ]
+        model.detalhes = [self._detalhe_to_model(d, model) for d in entity.detalhes]
 
         return model
 
@@ -78,23 +72,17 @@ class ProdutoMapper:
             moeda=Moeda(
                 codigo=model.preco_moeda,
                 nome="",  # Nome será preenchido pelo construtor
-                simbolo=""  # Símbolo será preenchido pelo construtor
+                simbolo="",  # Símbolo será preenchido pelo construtor
             ),
             data_inicio=model.preco_data_inicio,
-            data_fim=model.preco_data_fim
+            data_fim=model.preco_data_fim,
         )
 
         # Converte variações
-        variacoes = [
-            self._variacao_to_entity(v)
-            for v in model.variacoes
-        ]
+        variacoes = [self._variacao_to_entity(v) for v in model.variacoes]
 
         # Converte detalhes
-        detalhes = [
-            self._detalhe_to_entity(d)
-            for d in model.detalhes
-        ]
+        detalhes = [self._detalhe_to_entity(d) for d in model.detalhes]
 
         return Produto(
             sku=model.sku,
@@ -104,13 +92,11 @@ class ProdutoMapper:
             variacoes=variacoes,
             detalhes=detalhes,
             data_criacao=model.data_criacao,
-            ativo=model.ativo
+            ativo=model.ativo,
         )
 
     def _variacao_to_model(
-        self,
-        entity: Variacao,
-        produto_model: ProdutoModel
+        self, entity: Variacao, produto_model: ProdutoModel
     ) -> VariacaoModel:
         """
         Converte uma entidade Variacao para um modelo SQLAlchemy.
@@ -128,13 +114,12 @@ class ProdutoMapper:
             codigo=entity.codigo,
             data_criacao=entity.data_criacao,
             ativo=entity.ativo,
-            produto=produto_model
+            produto=produto_model,
         )
 
         # Converte detalhes da variação
         model.detalhes = [
-            self._detalhe_variacao_to_model(d, model)
-            for d in entity.detalhes
+            self._detalhe_variacao_to_model(d, model) for d in entity.detalhes
         ]
 
         return model
@@ -150,10 +135,7 @@ class ProdutoMapper:
             Variacao: A entidade correspondente
         """
         # Converte detalhes da variação
-        detalhes = [
-            self._detalhe_to_entity(d)
-            for d in model.detalhes
-        ]
+        detalhes = [self._detalhe_to_entity(d) for d in model.detalhes]
 
         return Variacao(
             nome=model.nome,
@@ -161,13 +143,11 @@ class ProdutoMapper:
             codigo=model.codigo,
             detalhes=detalhes,
             data_criacao=model.data_criacao,
-            ativo=model.ativo
+            ativo=model.ativo,
         )
 
     def _detalhe_to_model(
-        self,
-        entity: Detalhe,
-        produto_model: ProdutoModel
+        self, entity: Detalhe, produto_model: ProdutoModel
     ) -> DetalheModel:
         """
         Converte uma entidade Detalhe para um modelo SQLAlchemy.
@@ -185,13 +165,11 @@ class ProdutoMapper:
             tipo=entity.tipo,
             data_criacao=entity.data_criacao,
             ativo=entity.ativo,
-            produto=produto_model
+            produto=produto_model,
         )
 
     def _detalhe_variacao_to_model(
-        self,
-        entity: Detalhe,
-        variacao_model: VariacaoModel
+        self, entity: Detalhe, variacao_model: VariacaoModel
     ) -> DetalheVariacaoModel:
         """
         Converte uma entidade Detalhe para um modelo SQLAlchemy de detalhe de variação.
@@ -209,13 +187,10 @@ class ProdutoMapper:
             tipo=entity.tipo,
             data_criacao=entity.data_criacao,
             ativo=entity.ativo,
-            variacao=variacao_model
+            variacao=variacao_model,
         )
 
-    def _detalhe_to_entity(
-        self,
-        model: DetalheModel | DetalheVariacaoModel
-    ) -> Detalhe:
+    def _detalhe_to_entity(self, model: DetalheModel | DetalheVariacaoModel) -> Detalhe:
         """
         Converte um modelo SQLAlchemy para uma entidade Detalhe.
 
@@ -230,5 +205,5 @@ class ProdutoMapper:
             valor=model.valor,
             tipo=model.tipo,
             data_criacao=model.data_criacao,
-            ativo=model.ativo
-        ) 
+            ativo=model.ativo,
+        )

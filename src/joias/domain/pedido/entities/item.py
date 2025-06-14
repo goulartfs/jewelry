@@ -5,8 +5,8 @@ Este módulo define a estrutura e comportamento de um item que pode
 ser parte de um pedido ou lista de compras.
 """
 from dataclasses import dataclass
-from typing import Optional
 from decimal import Decimal
+from typing import Optional
 
 from ...catalogo.entities.produto import Produto
 from ...shared.value_objects.preco import Preco
@@ -27,6 +27,7 @@ class Item:
         desconto_percentual: Desconto percentual aplicado ao item (0-100)
         notas: Observações ou especificações especiais para o item
     """
+
     produto: Produto
     quantidade: int
     preco_unitario: Preco
@@ -37,7 +38,7 @@ class Item:
         """Validação após inicialização do item."""
         if self.quantidade <= 0:
             raise ValueError("A quantidade deve ser maior que zero")
-        
+
         if self.desconto_percentual is not None:
             if not isinstance(self.desconto_percentual, Decimal):
                 self.desconto_percentual = Decimal(str(self.desconto_percentual))
@@ -76,7 +77,7 @@ class Item:
         """
         if self.desconto_percentual is None or self.desconto_percentual == 0:
             return self.subtotal
-        
+
         desconto = self.valor_desconto
         return self.subtotal - desconto if desconto else self.subtotal
 
@@ -136,4 +137,4 @@ class Item:
         base += f" = {self.total}"
         if self.notas:
             base += f" [{self.notas}]"
-        return base 
+        return base

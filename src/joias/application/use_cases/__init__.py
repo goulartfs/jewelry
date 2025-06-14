@@ -5,67 +5,64 @@ Este módulo contém os casos de uso que implementam as regras de negócio
 da aplicação, orquestrando as entidades do domínio e seus repositórios.
 """
 
-from .usuario import (
-    CriarUsuarioUseCase,
-    AtualizarUsuarioUseCase,
-    BuscarUsuarioUseCase,
-    ListarUsuariosUseCase,
-    RemoverUsuarioUseCase
-)
-
-from .produto import (
-    CriarProdutoUseCase,
-    AtualizarProdutoUseCase,
-    BuscarProdutoUseCase,
-    ListarProdutosUseCase,
-    RemoverProdutoUseCase,
-    AdicionarVariacaoUseCase,
-    AdicionarDetalheUseCase
-)
-
-from .pedido import (
-    CriarPedidoUseCase,
-    AdicionarItemPedidoUseCase,
-    ConfirmarPedidoUseCase,
-    CancelarPedidoUseCase,
-    BuscarPedidoUseCase,
-    ListarPedidosUseCase
-)
-
 from .catalogo import (
-    CriarCatalogoUseCase,
+    AdicionarProdutoCatalogoUseCase,
     AtualizarCatalogoUseCase,
     BuscarCatalogoUseCase,
+    CriarCatalogoUseCase,
     ListarCatalogosUseCase,
-    AdicionarProdutoCatalogoUseCase
+)
+from .pedido import (
+    AdicionarItemPedidoUseCase,
+    BuscarPedidoUseCase,
+    CancelarPedidoUseCase,
+    ConfirmarPedidoUseCase,
+    CriarPedidoUseCase,
+    ListarPedidosUseCase,
+)
+from .produto import (
+    AdicionarDetalheUseCase,
+    AdicionarVariacaoUseCase,
+    AtualizarProdutoUseCase,
+    BuscarProdutoUseCase,
+    CriarProdutoUseCase,
+    ListarProdutosUseCase,
+    RemoverProdutoUseCase,
+)
+from .usuario import (
+    AtualizarUsuarioUseCase,
+    BuscarUsuarioUseCase,
+    CriarUsuarioUseCase,
+    ListarUsuariosUseCase,
+    RemoverUsuarioUseCase,
 )
 
 __all__ = [
     # Usuário
-    'CriarUsuarioUseCase',
-    'AtualizarUsuarioUseCase',
-    'BuscarUsuarioUseCase',
-    'ListarUsuariosUseCase',
-    'RemoverUsuarioUseCase',
+    "CriarUsuarioUseCase",
+    "AtualizarUsuarioUseCase",
+    "BuscarUsuarioUseCase",
+    "ListarUsuariosUseCase",
+    "RemoverUsuarioUseCase",
     # Produto
-    'CriarProdutoUseCase',
-    'AtualizarProdutoUseCase',
-    'BuscarProdutoUseCase',
-    'ListarProdutosUseCase',
-    'RemoverProdutoUseCase',
-    'AdicionarVariacaoUseCase',
-    'AdicionarDetalheUseCase',
+    "CriarProdutoUseCase",
+    "AtualizarProdutoUseCase",
+    "BuscarProdutoUseCase",
+    "ListarProdutosUseCase",
+    "RemoverProdutoUseCase",
+    "AdicionarVariacaoUseCase",
+    "AdicionarDetalheUseCase",
     # Pedido
-    'CriarPedidoUseCase',
-    'AdicionarItemPedidoUseCase',
-    'ConfirmarPedidoUseCase',
-    'CancelarPedidoUseCase',
-    'BuscarPedidoUseCase',
-    'ListarPedidosUseCase',
+    "CriarPedidoUseCase",
+    "AdicionarItemPedidoUseCase",
+    "ConfirmarPedidoUseCase",
+    "CancelarPedidoUseCase",
+    "BuscarPedidoUseCase",
+    "ListarPedidosUseCase",
     # Catálogo
-    'CriarCatalogoUseCase',
-    'AtualizarCatalogoUseCase',
-    'BuscarCatalogoUseCase',
-    'ListarCatalogosUseCase',
-    'AdicionarProdutoCatalogoUseCase',
-] 
+    "CriarCatalogoUseCase",
+    "AtualizarCatalogoUseCase",
+    "BuscarCatalogoUseCase",
+    "ListarCatalogosUseCase",
+    "AdicionarProdutoCatalogoUseCase",
+]

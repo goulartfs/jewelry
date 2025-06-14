@@ -15,7 +15,7 @@ from .base import MemoryRepository
 class MemoryPedidoRepository(MemoryRepository[Pedido], PedidoRepository):
     """
     Implementação do repositório de pedidos em memória.
-    
+
     Esta implementação é útil para testes e desenvolvimento.
     """
 
@@ -29,10 +29,7 @@ class MemoryPedidoRepository(MemoryRepository[Pedido], PedidoRepository):
         Returns:
             Lista de pedidos do cliente
         """
-        return [
-            p for p in self._items.values()
-            if p.cliente.id == cliente_id
-        ]
+        return [p for p in self._items.values() if p.cliente.id == cliente_id]
 
     def buscar_por_status(self, status: StatusPedido) -> List[Pedido]:
         """
@@ -44,15 +41,10 @@ class MemoryPedidoRepository(MemoryRepository[Pedido], PedidoRepository):
         Returns:
             Lista de pedidos com o status especificado
         """
-        return [
-            p for p in self._items.values()
-            if p.status == status
-        ]
+        return [p for p in self._items.values() if p.status == status]
 
     def buscar_por_periodo(
-        self,
-        data_inicio: datetime,
-        data_fim: datetime
+        self, data_inicio: datetime, data_fim: datetime
     ) -> List[Pedido]:
         """
         Busca pedidos em um período específico.
@@ -65,8 +57,7 @@ class MemoryPedidoRepository(MemoryRepository[Pedido], PedidoRepository):
             Lista de pedidos no período especificado
         """
         return [
-            p for p in self._items.values()
-            if data_inicio <= p.data_criacao <= data_fim
+            p for p in self._items.values() if data_inicio <= p.data_criacao <= data_fim
         ]
 
     def buscar_por_produto(self, produto_id: int) -> List[Pedido]:
@@ -80,7 +71,8 @@ class MemoryPedidoRepository(MemoryRepository[Pedido], PedidoRepository):
             Lista de pedidos que contêm o produto
         """
         return [
-            p for p in self._items.values()
+            p
+            for p in self._items.values()
             if any(i.produto.id == produto_id for i in p.itens)
         ]
 
@@ -95,7 +87,8 @@ class MemoryPedidoRepository(MemoryRepository[Pedido], PedidoRepository):
             Lista de pedidos em rascunho do cliente
         """
         return [
-            p for p in self._items.values()
+            p
+            for p in self._items.values()
             if p.cliente.id == cliente_id and p.status == StatusPedido.RASCUNHO
         ]
 
@@ -107,7 +100,4 @@ class MemoryPedidoRepository(MemoryRepository[Pedido], PedidoRepository):
             Lista de pedidos ativos
         """
         status_inativos = {StatusPedido.CANCELADO, StatusPedido.ENTREGUE}
-        return [
-            p for p in self._items.values()
-            if p.status not in status_inativos
-        ] 
+        return [p for p in self._items.values() if p.status not in status_inativos]

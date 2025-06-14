@@ -6,12 +6,14 @@ incluindo usuários, contatos, dados pessoais, endereços, etc.
 """
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional
 from decimal import Decimal
+from typing import List, Optional
+
 
 @dataclass
 class Endereco:
     """Representa um endereço físico no sistema."""
+
     id: int
     logradouro: str
     numero: str
@@ -24,9 +26,11 @@ class Endereco:
     data_criacao: datetime = field(default_factory=datetime.now)
     ativo: bool = True
 
+
 @dataclass
 class DadoPessoal:
     """Representa os dados pessoais de um indivíduo."""
+
     id: int
     nome: str
     cpf: str
@@ -36,9 +40,11 @@ class DadoPessoal:
     data_criacao: datetime = field(default_factory=datetime.now)
     ativo: bool = True
 
+
 @dataclass
 class Contato:
     """Representa informações de contato."""
+
     id: int
     email: str
     telefone: str
@@ -46,9 +52,11 @@ class Contato:
     data_criacao: datetime = field(default_factory=datetime.now)
     ativo: bool = True
 
+
 @dataclass
 class Empresa:
     """Representa uma organização ou negócio."""
+
     id: int
     razao_social: str
     nome_fantasia: str
@@ -60,9 +68,11 @@ class Empresa:
     data_criacao: datetime = field(default_factory=datetime.now)
     ativo: bool = True
 
+
 @dataclass
 class Permissao:
     """Representa uma permissão no sistema."""
+
     id: int
     nome: str
     descricao: str
@@ -70,9 +80,11 @@ class Permissao:
     data_criacao: datetime = field(default_factory=datetime.now)
     ativo: bool = True
 
+
 @dataclass
 class Perfil:
     """Define um conjunto de permissões para usuários."""
+
     id: int
     nome: str
     descricao: str
@@ -80,9 +92,11 @@ class Perfil:
     data_criacao: datetime = field(default_factory=datetime.now)
     ativo: bool = True
 
+
 @dataclass
 class Usuario:
     """Representa um usuário do sistema."""
+
     id: int
     username: str
     email: str
@@ -94,9 +108,11 @@ class Usuario:
     data_criacao: datetime = field(default_factory=datetime.now)
     ativo: bool = True
 
+
 @dataclass
 class Preco:
     """Representa o preço de um produto."""
+
     id: int
     valor: Decimal
     moeda: str = "BRL"
@@ -105,9 +121,11 @@ class Preco:
     data_criacao: datetime = field(default_factory=datetime.now)
     ativo: bool = True
 
+
 @dataclass
 class Detalhe:
     """Contém informações detalhadas sobre um produto."""
+
     id: int
     nome: str
     valor: str
@@ -115,9 +133,11 @@ class Detalhe:
     data_criacao: datetime = field(default_factory=datetime.now)
     ativo: bool = True
 
+
 @dataclass
 class Variacao:
     """Representa uma variação específica de um produto."""
+
     id: int
     nome: str
     descricao: str
@@ -126,9 +146,11 @@ class Variacao:
     data_criacao: datetime = field(default_factory=datetime.now)
     ativo: bool = True
 
+
 @dataclass
 class Produto:
     """Representa um produto que pode ser vendido."""
+
     id: int
     nome: str
     descricao: str
@@ -139,9 +161,11 @@ class Produto:
     data_criacao: datetime = field(default_factory=datetime.now)
     ativo: bool = True
 
+
 @dataclass
 class Catalogo:
     """Representa uma coleção de produtos."""
+
     id: int
     nome: str
     descricao: str
@@ -152,14 +176,16 @@ class Catalogo:
     data_criacao: datetime = field(default_factory=datetime.now)
     ativo: bool = True
 
+
 @dataclass
 class ItemPedido:
     """Representa um item específico em um pedido."""
+
     id: int
     produto: Produto
     quantidade: int
     preco_unitario: Decimal
-    desconto: Decimal = Decimal('0')
+    desconto: Decimal = Decimal("0")
     data_criacao: datetime = field(default_factory=datetime.now)
     ativo: bool = True
 
@@ -168,9 +194,11 @@ class ItemPedido:
         """Calcula o subtotal do item (preço * quantidade - desconto)."""
         return (self.preco_unitario * self.quantidade) - self.desconto
 
+
 @dataclass
 class Pedido:
     """Representa um pedido no sistema."""
+
     id: int
     usuario: Usuario
     itens: List[ItemPedido] = field(default_factory=list)
@@ -185,4 +213,4 @@ class Pedido:
     @property
     def total(self) -> Decimal:
         """Calcula o valor total do pedido."""
-        return sum(item.subtotal for item in self.itens) 
+        return sum(item.subtotal for item in self.itens)

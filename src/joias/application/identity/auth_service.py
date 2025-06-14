@@ -6,14 +6,17 @@ incluindo geração e validação de tokens JWT.
 """
 import os
 from datetime import datetime, timedelta
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
 from jose import jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from ...domain.identity.entities.usuario import Usuario
 from ...domain.shared.value_objects.email import Email
-from ...infrastructure.persistence.sqlalchemy.repositories.usuario_repository import UsuarioRepository
+from ...infrastructure.persistence.sqlalchemy.repositories.usuario_repository import (
+    UsuarioRepository,
+)
 
 
 class AuthService:
@@ -84,9 +87,7 @@ class AuthService:
         return user
 
     def create_access_token(
-        self,
-        data: Dict[str, Any],
-        expires_delta: Optional[timedelta] = None
+        self, data: Dict[str, Any], expires_delta: Optional[timedelta] = None
     ) -> str:
         """
         Cria um token de acesso JWT.
@@ -104,11 +105,7 @@ class AuthService:
         else:
             expire = datetime.utcnow() + timedelta(minutes=15)
         to_encode.update({"exp": expire})
-        encoded_jwt = jwt.encode(
-            to_encode,
-            self.secret_key,
-            algorithm=self.algorithm
-        )
+        encoded_jwt = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
         return encoded_jwt
 
     def get_user(self, user_id: str) -> Optional[Usuario]:
@@ -121,4 +118,4 @@ class AuthService:
         Returns:
             Optional[Usuario]: Usuário encontrado ou None
         """
-        return self.usuario_repository.buscar_por_id(user_id) 
+        return self.usuario_repository.buscar_por_id(user_id)

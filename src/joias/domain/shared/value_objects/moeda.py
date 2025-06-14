@@ -21,14 +21,15 @@ class Moeda:
         nome: Nome completo da moeda (ex: 'Real Brasileiro')
         simbolo: Símbolo da moeda (ex: 'R$')
     """
+
     codigo: str
     nome: str
     simbolo: str
 
     # Moedas pré-definidas para uso comum
-    BRL: ClassVar['Moeda']
-    USD: ClassVar['Moeda']
-    EUR: ClassVar['Moeda']
+    BRL: ClassVar["Moeda"]
+    USD: ClassVar["Moeda"]
+    EUR: ClassVar["Moeda"]
 
     def __post_init__(self):
         """Validação após inicialização."""
@@ -43,7 +44,7 @@ class Moeda:
             raise ValueError("O símbolo da moeda não pode ser vazio.")
 
         # Força o código para maiúsculas
-        object.__setattr__(self, 'codigo', self.codigo.upper())
+        object.__setattr__(self, "codigo", self.codigo.upper())
 
     def __str__(self) -> str:
         """Retorna uma representação legível da moeda."""
@@ -57,4 +58,4 @@ class Moeda:
 # Definição das moedas mais comuns
 Moeda.BRL = Moeda("BRL", "Real Brasileiro", "R$")
 Moeda.USD = Moeda("USD", "Dólar Americano", "$")
-Moeda.EUR = Moeda("EUR", "Euro", "€") 
+Moeda.EUR = Moeda("EUR", "Euro", "€")

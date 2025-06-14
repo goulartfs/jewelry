@@ -5,15 +5,16 @@ Este módulo contém a implementação concreta do repositório de fornecedores
 usando SQLAlchemy como ORM.
 """
 from typing import List, Optional
+
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from .....domain.catalogo.entities.fornecedor import Fornecedor as FornecedorEntity
 from .....domain.catalogo.entities.fornecedor import Documento as DocumentoEntity
+from .....domain.catalogo.entities.fornecedor import Fornecedor as FornecedorEntity
 from .....domain.catalogo.repositories.fornecedor_repository import FornecedorRepository
-from ..models.fornecedor import Fornecedor as FornecedorModel
-from ..models.fornecedor import Documento as DocumentoModel
 from ..mappers.fornecedor_mapper import to_entity, to_model, update_model
+from ..models.fornecedor import Documento as DocumentoModel
+from ..models.fornecedor import Fornecedor as FornecedorModel
 
 
 class SQLAlchemyFornecedorRepository(FornecedorRepository):
@@ -64,8 +65,7 @@ class SQLAlchemyFornecedorRepository(FornecedorRepository):
         return to_entity(model)
 
     def buscar_por_documento(
-        self,
-        documento: DocumentoEntity
+        self, documento: DocumentoEntity
     ) -> Optional[FornecedorEntity]:
         """
         Busca um fornecedor pelo documento.
@@ -81,7 +81,7 @@ class SQLAlchemyFornecedorRepository(FornecedorRepository):
             .join(FornecedorModel.documentos)
             .filter(
                 DocumentoModel.numero == documento.numero,
-                DocumentoModel.tipo == documento.tipo
+                DocumentoModel.tipo == documento.tipo,
             )
             .first()
         )
@@ -121,10 +121,7 @@ class SQLAlchemyFornecedorRepository(FornecedorRepository):
         )
         return [to_entity(model) for model in models]
 
-    def atualizar(
-        self,
-        fornecedor: FornecedorEntity
-    ) -> Optional[FornecedorEntity]:
+    def atualizar(self, fornecedor: FornecedorEntity) -> Optional[FornecedorEntity]:
         """
         Atualiza um fornecedor existente.
 
@@ -158,4 +155,4 @@ class SQLAlchemyFornecedorRepository(FornecedorRepository):
             return False
 
         self._session.delete(model)
-        return True 
+        return True

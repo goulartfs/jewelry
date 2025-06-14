@@ -5,10 +5,10 @@ Este módulo contém a entidade de usuário e suas classes relacionadas.
 """
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional, List
+from typing import List, Optional
 
-from .base import Entity
 from .autorizacao import Perfil
+from .base import Entity
 from .dados_pessoais import DadoPessoal
 from .empresa import Empresa
 
@@ -17,10 +17,11 @@ from .empresa import Empresa
 class Usuario(Entity):
     """
     Entidade que representa um usuário do sistema.
-    
+
     Um usuário é uma pessoa que interage com o sistema e pode
     ter diferentes níveis de acesso baseados em seu perfil.
     """
+
     username: str
     email: str
     senha_hash: str
@@ -69,7 +70,4 @@ class Usuario(Entity):
         Returns:
             True se o usuário tem a permissão, False caso contrário
         """
-        return any(
-            p.codigo == codigo_permissao
-            for p in self.perfil.permissoes
-        ) 
+        return any(p.codigo == codigo_permissao for p in self.perfil.permissoes)

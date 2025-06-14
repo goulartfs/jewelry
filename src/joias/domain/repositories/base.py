@@ -4,17 +4,17 @@ Interface base para repositórios.
 Este módulo contém a interface base que todos os repositórios devem implementar.
 """
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, List, Optional
+from typing import Generic, List, Optional, TypeVar
 
 from ..entities.base import Entity
 
-T = TypeVar('T', bound=Entity)
+T = TypeVar("T", bound=Entity)
 
 
 class Repository(Generic[T], ABC):
     """
     Interface base para repositórios.
-    
+
     Define o contrato que todos os repositórios devem seguir para
     persistir e recuperar entidades do domínio.
     """
@@ -82,4 +82,4 @@ class Repository(Generic[T], ABC):
         Returns:
             A entidade atualizada ou None se não encontrada
         """
-        pass 
+        pass

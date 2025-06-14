@@ -6,9 +6,9 @@ relacionada a fornecedores que não pertence naturalmente a nenhuma entidade.
 """
 from typing import List, Optional
 
-from ..entities.fornecedor import Fornecedor, Documento
-from ..repositories.fornecedor_repository import FornecedorRepository
 from ...shared.value_objects.endereco import Endereco
+from ..entities.fornecedor import Documento, Fornecedor
+from ..repositories.fornecedor_repository import FornecedorRepository
 
 
 class FornecedorService:
@@ -29,10 +29,7 @@ class FornecedorService:
         self._repository = fornecedor_repository
 
     def criar_fornecedor(
-        self,
-        nome: str,
-        documento: Documento,
-        endereco: Endereco
+        self, nome: str, documento: Documento, endereco: Endereco
     ) -> Fornecedor:
         """
         Cria um novo fornecedor.
@@ -50,22 +47,14 @@ class FornecedorService:
         """
         # Verifica se já existe um fornecedor com o mesmo documento
         if self._repository.buscar_por_documento(documento):
-            raise ValueError(
-                f"Já existe um fornecedor com o documento {documento}"
-            )
+            raise ValueError(f"Já existe um fornecedor com o documento {documento}")
 
-        fornecedor = Fornecedor(
-            nome=nome,
-            documentos=[documento],
-            endereco=endereco
-        )
+        fornecedor = Fornecedor(nome=nome, documentos=[documento], endereco=endereco)
 
         return self._repository.salvar(fornecedor)
 
     def adicionar_documento(
-        self,
-        fornecedor_id: int,
-        documento: Documento
+        self, fornecedor_id: int, documento: Documento
     ) -> Optional[Fornecedor]:
         """
         Adiciona um novo documento a um fornecedor.
@@ -82,9 +71,7 @@ class FornecedorService:
         """
         # Verifica se já existe um fornecedor com o mesmo documento
         if self._repository.buscar_por_documento(documento):
-            raise ValueError(
-                f"Já existe um fornecedor com o documento {documento}"
-            )
+            raise ValueError(f"Já existe um fornecedor com o documento {documento}")
 
         fornecedor = self._repository.buscar_por_id(fornecedor_id)
         if not fornecedor:
@@ -94,9 +81,7 @@ class FornecedorService:
         return self._repository.atualizar(fornecedor)
 
     def remover_documento(
-        self,
-        fornecedor_id: int,
-        documento: Documento
+        self, fornecedor_id: int, documento: Documento
     ) -> Optional[Fornecedor]:
         """
         Remove um documento de um fornecedor.
@@ -119,9 +104,7 @@ class FornecedorService:
         return self._repository.atualizar(fornecedor)
 
     def atualizar_endereco(
-        self,
-        fornecedor_id: int,
-        novo_endereco: Endereco
+        self, fornecedor_id: int, novo_endereco: Endereco
     ) -> Optional[Fornecedor]:
         """
         Atualiza o endereço de um fornecedor.
@@ -184,4 +167,4 @@ class FornecedorService:
             return False
 
         fornecedor.ativar()
-        return self._repository.atualizar(fornecedor) is not None 
+        return self._repository.atualizar(fornecedor) is not None

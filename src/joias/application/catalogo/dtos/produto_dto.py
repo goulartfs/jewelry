@@ -5,14 +5,15 @@ Este módulo contém os DTOs (Data Transfer Objects) usados para transferir
 dados de produtos entre as camadas da aplicação.
 """
 from dataclasses import dataclass
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
 from typing import List, Optional
 
 
 @dataclass
 class PrecoDTO:
     """DTO para preços."""
+
     valor: Decimal
     moeda: str
     data_inicio: datetime
@@ -22,6 +23,7 @@ class PrecoDTO:
 @dataclass
 class DetalheDTO:
     """DTO para detalhes."""
+
     nome: str
     valor: str
     tipo: str
@@ -30,6 +32,7 @@ class DetalheDTO:
 @dataclass
 class VariacaoDTO:
     """DTO para variações."""
+
     nome: str
     descricao: str
     codigo: str
@@ -39,6 +42,7 @@ class VariacaoDTO:
 @dataclass
 class ProdutoDTO:
     """DTO para produtos."""
+
     sku: str
     nome: str
     descricao: str
@@ -50,6 +54,7 @@ class ProdutoDTO:
 @dataclass
 class CriarProdutoDTO:
     """DTO para criação de produtos."""
+
     sku: str
     nome: str
     descricao: str
@@ -60,6 +65,7 @@ class CriarProdutoDTO:
 @dataclass
 class AtualizarProdutoDTO:
     """DTO para atualização de produtos."""
+
     nome: Optional[str] = None
     descricao: Optional[str] = None
     preco_valor: Optional[Decimal] = None
@@ -69,8 +75,9 @@ class AtualizarProdutoDTO:
 @dataclass
 class ListagemProdutoDTO:
     """DTO para listagem de produtos."""
+
     sku: str
     nome: str
     preco_valor: Decimal
     preco_moeda: str
-    ativo: bool 
+    ativo: bool

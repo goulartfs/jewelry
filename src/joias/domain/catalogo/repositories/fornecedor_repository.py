@@ -7,7 +7,7 @@ repositório que queira persistir fornecedores.
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from ..entities.fornecedor import Fornecedor, Documento
+from ..entities.fornecedor import Documento, Fornecedor
 
 
 class FornecedorRepository(ABC):
@@ -108,4 +108,4 @@ class FornecedorRepository(ABC):
         Returns:
             bool: True se removido com sucesso, False caso contrário
         """
-        pass 
+        pass

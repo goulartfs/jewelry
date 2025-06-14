@@ -223,3 +223,57 @@ src/joias/
 ## Licença
 
 Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+### US2: Visualização de Usuário
+
+Endpoint para consultar os detalhes de um usuário específico:
+
+```http
+GET /api/usuarios/{id}
+```
+
+**Respostas:**
+- `200 OK`: Usuário encontrado
+  ```json
+  {
+      "id": "123e4567-e89b-12d3-a456-426614174000",
+      "nome": "João da Silva",
+      "email": "joao@email.com",
+      "ativo": true,
+      "data_criacao": "2023-11-21T10:30:00Z"
+  }
+  ```
+- `404 Not Found`: Usuário não encontrado
+  ```json
+  {
+      "erro": "Usuário não encontrado"
+  }
+  ```
+
+### US3: Listagem de Usuários
+
+Endpoint para listar usuários com paginação e filtros:
+
+```http
+GET /api/usuarios?pagina=1&tamanho=10&nome=João&email=joao@email.com
+```
+
+**Parâmetros:**
+- `pagina`: Número da página (padrão: 1)
+- `tamanho`: Quantidade de itens por página (padrão: 10)
+- `nome`: Filtro por nome (opcional)
+- `email`: Filtro por email (opcional)
+
+**Respostas:**
+- `200 OK`: Lista de usuários
+  ```json
+  [
+      {
+          "id": "123e4567-e89b-12d3-a456-426614174000",
+          "nome": "João da Silva",
+          "email": "joao@email.com",
+          "ativo": true,
+          "data_criacao": "2023-11-21T10:30:00Z"
+      }
+  ]
+  ```

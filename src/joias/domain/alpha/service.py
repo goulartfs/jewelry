@@ -4,21 +4,34 @@ Serviços do módulo alpha.
 Este módulo contém os serviços responsáveis por gerenciar as operações
 relacionadas às entidades principais do sistema.
 """
-from typing import List, Optional, TypeVar, Generic
 from datetime import datetime
+from typing import Generic, List, Optional, TypeVar
+
 from .models import (
-    Usuario, Contato, DadoPessoal, Endereco, Empresa,
-    Permissao, Perfil, Produto, Catalogo, Pedido, ItemPedido,
-    Preco, Detalhe, Variacao
+    Catalogo,
+    Contato,
+    DadoPessoal,
+    Detalhe,
+    Empresa,
+    Endereco,
+    ItemPedido,
+    Pedido,
+    Perfil,
+    Permissao,
+    Preco,
+    Produto,
+    Usuario,
+    Variacao,
 )
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 class BaseService(Generic[T]):
     """
     Serviço base que implementa operações CRUD genéricas.
     """
-    
+
     def __init__(self):
         self._items = {}
         self._next_id = 1
@@ -33,7 +46,7 @@ class BaseService(Generic[T]):
         Returns:
             T: Item criado com ID atualizado
         """
-        setattr(item, 'id', self._next_id)
+        setattr(item, "id", self._next_id)
         self._items[self._next_id] = item
         self._next_id += 1
         return item
@@ -62,7 +75,7 @@ class BaseService(Generic[T]):
         """
         items = self._items.values()
         if active_only:
-            return [item for item in items if getattr(item, 'ativo', True)]
+            return [item for item in items if getattr(item, "ativo", True)]
         return list(items)
 
     def update(self, item_id: int, item: T) -> Optional[T]:
@@ -78,7 +91,7 @@ class BaseService(Generic[T]):
         """
         if item_id not in self._items:
             return None
-        setattr(item, 'id', item_id)
+        setattr(item, "id", item_id)
         self._items[item_id] = item
         return item
 
@@ -110,13 +123,13 @@ class BaseService(Generic[T]):
         item = self.get(item_id)
         if not item:
             return False
-        setattr(item, 'ativo', False)
+        setattr(item, "ativo", False)
         return True
 
 
 class UsuarioService(BaseService[Usuario]):
     """Serviço para gerenciamento de usuários."""
-    
+
     def get_by_email(self, email: str) -> Optional[Usuario]:
         """
         Busca um usuário pelo email.
@@ -127,10 +140,7 @@ class UsuarioService(BaseService[Usuario]):
         Returns:
             Optional[Usuario]: Usuário encontrado ou None
         """
-        return next(
-            (u for u in self._items.values() if u.email == email),
-            None
-        )
+        return next((u for u in self._items.values() if u.email == email), None)
 
     def get_by_username(self, username: str) -> Optional[Usuario]:
         """
@@ -142,10 +152,7 @@ class UsuarioService(BaseService[Usuario]):
         Returns:
             Optional[Usuario]: Usuário encontrado ou None
         """
-        return next(
-            (u for u in self._items.values() if u.username == username),
-            None
-        )
+        return next((u for u in self._items.values() if u.username == username), None)
 
     def update_last_access(self, user_id: int) -> bool:
         """
@@ -166,7 +173,7 @@ class UsuarioService(BaseService[Usuario]):
 
 class ContatoService(BaseService[Contato]):
     """Serviço para gerenciamento de contatos."""
-    
+
     def get_by_email(self, email: str) -> Optional[Contato]:
         """
         Busca um contato pelo email.
@@ -177,15 +184,12 @@ class ContatoService(BaseService[Contato]):
         Returns:
             Optional[Contato]: Contato encontrado ou None
         """
-        return next(
-            (c for c in self._items.values() if c.email == email),
-            None
-        )
+        return next((c for c in self._items.values() if c.email == email), None)
 
 
 class DadoPessoalService(BaseService[DadoPessoal]):
     """Serviço para gerenciamento de dados pessoais."""
-    
+
     def get_by_cpf(self, cpf: str) -> Optional[DadoPessoal]:
         """
         Busca dados pessoais pelo CPF.
@@ -196,15 +200,12 @@ class DadoPessoalService(BaseService[DadoPessoal]):
         Returns:
             Optional[DadoPessoal]: Dados pessoais encontrados ou None
         """
-        return next(
-            (d for d in self._items.values() if d.cpf == cpf),
-            None
-        )
+        return next((d for d in self._items.values() if d.cpf == cpf), None)
 
 
 class EmpresaService(BaseService[Empresa]):
     """Serviço para gerenciamento de empresas."""
-    
+
     def get_by_cnpj(self, cnpj: str) -> Optional[Empresa]:
         """
         Busca uma empresa pelo CNPJ.
@@ -215,15 +216,12 @@ class EmpresaService(BaseService[Empresa]):
         Returns:
             Optional[Empresa]: Empresa encontrada ou None
         """
-        return next(
-            (e for e in self._items.values() if e.cnpj == cnpj),
-            None
-        )
+        return next((e for e in self._items.values() if e.cnpj == cnpj), None)
 
 
 class PermissaoService(BaseService[Permissao]):
     """Serviço para gerenciamento de permissões."""
-    
+
     def get_by_codigo(self, codigo: str) -> Optional[Permissao]:
         """
         Busca uma permissão pelo código.
@@ -234,15 +232,12 @@ class PermissaoService(BaseService[Permissao]):
         Returns:
             Optional[Permissao]: Permissão encontrada ou None
         """
-        return next(
-            (p for p in self._items.values() if p.codigo == codigo),
-            None
-        )
+        return next((p for p in self._items.values() if p.codigo == codigo), None)
 
 
 class PerfilService(BaseService[Perfil]):
     """Serviço para gerenciamento de perfis."""
-    
+
     def add_permissao(self, perfil_id: int, permissao: Permissao) -> bool:
         """
         Adiciona uma permissão ao perfil.
@@ -274,7 +269,7 @@ class PerfilService(BaseService[Perfil]):
         perfil = self.get(perfil_id)
         if not perfil:
             return False
-        
+
         for i, perm in enumerate(perfil.permissoes):
             if perm.id == permissao_id:
                 perfil.permissoes.pop(i)
@@ -284,7 +279,7 @@ class PerfilService(BaseService[Perfil]):
 
 class ProdutoService(BaseService[Produto]):
     """Serviço para gerenciamento de produtos."""
-    
+
     def get_by_codigo(self, codigo: str) -> Optional[Produto]:
         """
         Busca um produto pelo código.
@@ -295,10 +290,7 @@ class ProdutoService(BaseService[Produto]):
         Returns:
             Optional[Produto]: Produto encontrado ou None
         """
-        return next(
-            (p for p in self._items.values() if p.codigo == codigo),
-            None
-        )
+        return next((p for p in self._items.values() if p.codigo == codigo), None)
 
     def add_variacao(self, produto_id: int, variacao: Variacao) -> bool:
         """
@@ -337,7 +329,7 @@ class ProdutoService(BaseService[Produto]):
 
 class CatalogoService(BaseService[Catalogo]):
     """Serviço para gerenciamento de catálogos."""
-    
+
     def get_by_usuario(self, usuario_id: int) -> List[Catalogo]:
         """
         Lista os catálogos de um usuário.
@@ -349,8 +341,7 @@ class CatalogoService(BaseService[Catalogo]):
             List[Catalogo]: Lista de catálogos do usuário
         """
         return [
-            c for c in self._items.values()
-            if c.usuario.id == usuario_id and c.ativo
+            c for c in self._items.values() if c.usuario.id == usuario_id and c.ativo
         ]
 
     def add_produto(self, catalogo_id: int, produto: Produto) -> bool:
@@ -373,7 +364,7 @@ class CatalogoService(BaseService[Catalogo]):
 
 class PedidoService(BaseService[Pedido]):
     """Serviço para gerenciamento de pedidos."""
-    
+
     def get_by_usuario(self, usuario_id: int) -> List[Pedido]:
         """
         Lista os pedidos de um usuário.
@@ -385,8 +376,7 @@ class PedidoService(BaseService[Pedido]):
             List[Pedido]: Lista de pedidos do usuário
         """
         return [
-            p for p in self._items.values()
-            if p.usuario.id == usuario_id and p.ativo
+            p for p in self._items.values() if p.usuario.id == usuario_id and p.ativo
         ]
 
     def add_item(self, pedido_id: int, item: ItemPedido) -> bool:
@@ -438,4 +428,4 @@ class PedidoService(BaseService[Pedido]):
             return False
         pedido.status = "cancelado"
         pedido.data_cancelamento = datetime.now()
-        return True 
+        return True

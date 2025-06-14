@@ -16,9 +16,10 @@ from .base import Entity
 class Preco(Entity):
     """
     Entidade que representa o preço de um produto.
-    
+
     Um preço tem um valor monetário e um período de validade.
     """
+
     valor: Decimal
     moeda: str = "BRL"
     data_inicio: datetime = field(default_factory=datetime.now)
@@ -57,10 +58,11 @@ class Preco(Entity):
 class Detalhe(Entity):
     """
     Entidade que representa um detalhe de produto.
-    
+
     Um detalhe é uma característica específica de um produto,
     como material, cor, etc.
     """
+
     nome: str
     valor: str
     tipo: str
@@ -69,9 +71,9 @@ class Detalhe(Entity):
         if not isinstance(other, Detalhe):
             return NotImplemented
         return (
-            self.nome == other.nome and
-            self.valor == other.valor and
-            self.tipo == other.tipo
+            self.nome == other.nome
+            and self.valor == other.valor
+            and self.tipo == other.tipo
         )
 
     def __hash__(self):
@@ -82,10 +84,11 @@ class Detalhe(Entity):
 class Variacao(Entity):
     """
     Entidade que representa uma variação de produto.
-    
+
     Uma variação é uma versão específica de um produto,
     como tamanho, modelo, etc.
     """
+
     nome: str
     descricao: str
     codigo: str
@@ -118,10 +121,11 @@ class Variacao(Entity):
 class Produto(Entity):
     """
     Entidade que representa um produto.
-    
+
     Um produto é um item que pode ser vendido e pode ter
     diferentes variações e detalhes.
     """
+
     nome: str
     descricao: str
     codigo: str
@@ -147,10 +151,7 @@ class Produto(Entity):
         Args:
             variacao_id: ID da variação a ser removida
         """
-        self.variacoes = [
-            v for v in self.variacoes
-            if v.id != variacao_id
-        ]
+        self.variacoes = [v for v in self.variacoes if v.id != variacao_id]
         self.atualizar()
 
     def adicionar_detalhe(self, detalhe: Detalhe) -> None:
@@ -183,4 +184,4 @@ class Produto(Entity):
             preco: Novo preço
         """
         self.preco = preco
-        self.atualizar() 
+        self.atualizar()

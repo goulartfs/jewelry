@@ -5,8 +5,8 @@ Esta é uma entidade do domínio que representa um produto que pode ser
 vendido, com suas características e preço.
 """
 from dataclasses import dataclass, field
-from typing import List, Optional
 from datetime import datetime
+from typing import List, Optional
 
 from ...shared.value_objects.preco import Preco
 
@@ -14,6 +14,7 @@ from ...shared.value_objects.preco import Preco
 @dataclass
 class Detalhe:
     """Representa um detalhe específico do produto."""
+
     nome: str
     valor: str
     tipo: str
@@ -24,6 +25,7 @@ class Detalhe:
 @dataclass
 class Variacao:
     """Representa uma variação específica do produto."""
+
     nome: str
     descricao: str
     codigo: str
@@ -50,6 +52,7 @@ class Produto:
         data_criacao (datetime): Data de criação do produto
         ativo (bool): Indica se o produto está ativo
     """
+
     sku: str
     nome: str
     descricao: str
@@ -97,4 +100,4 @@ class Produto:
     def __repr__(self) -> str:
         """Retorna uma representação string do produto."""
         status = "ativo" if self.ativo else "inativo"
-        return f"{self.nome} ({self.sku}): {self.preco} - {status}" 
+        return f"{self.nome} ({self.sku}): {self.preco} - {status}"

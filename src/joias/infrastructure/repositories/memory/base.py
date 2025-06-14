@@ -4,11 +4,10 @@ Repositório base em memória.
 Este módulo contém a implementação base de um repositório
 em memória para testes.
 """
-from typing import Dict, List, Optional, TypeVar, Generic
+from typing import Dict, Generic, List, Optional, TypeVar
 
 from ....domain.entities.base import Entity
 from ....domain.repositories.base import Repository
-
 
 T = TypeVar("T", bound=Entity)
 
@@ -16,7 +15,7 @@ T = TypeVar("T", bound=Entity)
 class MemoryRepository(Repository[T], Generic[T]):
     """
     Implementação base de um repositório em memória.
-    
+
     Esta classe serve como base para implementações de repositórios
     em memória, úteis para testes.
     """
@@ -91,4 +90,4 @@ class MemoryRepository(Repository[T], Generic[T]):
         Returns:
             Lista com todos os itens
         """
-        return list(self._items.values()) 
+        return list(self._items.values())

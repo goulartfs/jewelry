@@ -6,15 +6,15 @@ como as entidades do domínio são persistidas e recuperadas.
 """
 
 from .base import Repository
-from .usuario import UsuarioRepository
-from .produto import ProdutoRepository
-from .pedido import PedidoRepository
 from .catalogo import CatalogoRepository
+from .pedido import PedidoRepository
+from .produto import ProdutoRepository
+from .usuario import UsuarioRepository
 
 __all__ = [
-    'Repository',
-    'UsuarioRepository',
-    'ProdutoRepository',
-    'PedidoRepository',
-    'CatalogoRepository',
-] 
+    "Repository",
+    "UsuarioRepository",
+    "ProdutoRepository",
+    "PedidoRepository",
+    "CatalogoRepository",
+]

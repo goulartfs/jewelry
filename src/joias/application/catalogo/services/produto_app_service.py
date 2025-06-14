@@ -5,23 +5,23 @@ Este módulo contém o serviço de aplicação que coordena as operações
 relacionadas a produtos, fazendo a ponte entre a interface com o usuário
 e o domínio.
 """
+from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional
-from datetime import datetime
 
-from ....domain.catalogo.entities.produto import Produto, Variacao, Detalhe
+from ....domain.catalogo.entities.produto import Detalhe, Produto, Variacao
 from ....domain.catalogo.repositories.produto_repository import ProdutoRepository
 from ....domain.catalogo.services.produto_service import ProdutoService
-from ....domain.shared.value_objects.preco import Preco
 from ....domain.shared.value_objects.moeda import Moeda
+from ....domain.shared.value_objects.preco import Preco
 from ..dtos.produto_dto import (
-    ProdutoDTO,
-    CriarProdutoDTO,
     AtualizarProdutoDTO,
+    CriarProdutoDTO,
+    DetalheDTO,
     ListagemProdutoDTO,
     PrecoDTO,
-    DetalheDTO,
-    VariacaoDTO
+    ProdutoDTO,
+    VariacaoDTO,
 )
 
 
@@ -33,10 +33,7 @@ class ProdutoAppService:
     coordenando as operações entre a interface com o usuário e o domínio.
     """
 
-    def __init__(
-        self,
-        produto_repository: ProdutoRepository
-    ):
+    def __init__(self, produto_repository: ProdutoRepository):
         """
         Inicializa o serviço com suas dependências.
 
@@ -64,23 +61,18 @@ class ProdutoAppService:
             moeda=Moeda(
                 codigo=dto.preco_moeda,
                 nome="",  # Nome será preenchido pelo construtor
-                simbolo=""  # Símbolo será preenchido pelo construtor
-            )
+                simbolo="",  # Símbolo será preenchido pelo construtor
+            ),
         )
 
         produto = self._service.criar_produto(
-            sku=dto.sku,
-            nome=dto.nome,
-            descricao=dto.descricao,
-            preco=preco
+            sku=dto.sku, nome=dto.nome, descricao=dto.descricao, preco=preco
         )
 
         return self._to_dto(produto)
 
     def atualizar_produto(
-        self,
-        produto_id: int,
-        dto: AtualizarProdutoDTO
+        self, produto_id: int, dto: AtualizarProdutoDTO
     ) -> Optional[ProdutoDTO]:
         """
         Atualiza um produto existente.
@@ -109,8 +101,8 @@ class ProdutoAppService:
                 moeda=Moeda(
                     codigo=dto.preco_moeda or produto.preco.moeda.codigo,
                     nome="",  # Nome será preenchido pelo construtor
-                    simbolo=""  # Símbolo será preenchido pelo construtor
-                )
+                    simbolo="",  # Símbolo será preenchido pelo construtor
+                ),
             )
             produto.atualizar_preco(novo_preco)
 
@@ -162,9 +154,7 @@ class ProdutoAppService:
         return [self._to_listagem_dto(p) for p in produtos]
 
     def buscar_por_faixa_de_preco(
-        self,
-        preco_minimo: Decimal,
-        preco_maximo: Decimal
+        self, preco_minimo: Decimal, preco_maximo: Decimal
     ) -> List[ListagemProdutoDTO]:
         """
         Busca produtos por faixa de preço.
@@ -177,10 +167,7 @@ class ProdutoAppService:
             List[ListagemProdutoDTO]: Lista de DTOs com dados resumidos
             dos produtos
         """
-        produtos = self._service.buscar_por_faixa_de_preco(
-            preco_minimo,
-            preco_maximo
-        )
+        produtos = self._service.buscar_por_faixa_de_preco(preco_minimo, preco_maximo)
         return [self._to_listagem_dto(p) for p in produtos]
 
     def desativar_produto(self, produto_id: int) -> bool:
@@ -225,7 +212,7 @@ class ProdutoAppService:
                 valor=produto.preco.valor,
                 moeda=produto.preco.moeda.codigo,
                 data_inicio=produto.preco.data_inicio,
-                data_fim=produto.preco.data_fim
+                data_fim=produto.preco.data_fim,
             ),
             variacoes=[
                 VariacaoDTO(
@@ -233,24 +220,16 @@ class ProdutoAppService:
                     descricao=v.descricao,
                     codigo=v.codigo,
                     detalhes=[
-                        DetalheDTO(
-                            nome=d.nome,
-                            valor=d.valor,
-                            tipo=d.tipo
-                        )
+                        DetalheDTO(nome=d.nome, valor=d.valor, tipo=d.tipo)
                         for d in v.detalhes
-                    ]
+                    ],
                 )
                 for v in produto.variacoes
             ],
             detalhes=[
-                DetalheDTO(
-                    nome=d.nome,
-                    valor=d.valor,
-                    tipo=d.tipo
-                )
+                DetalheDTO(nome=d.nome, valor=d.valor, tipo=d.tipo)
                 for d in produto.detalhes
-            ]
+            ],
         )
 
     def _to_listagem_dto(self, produto: Produto) -> ListagemProdutoDTO:
@@ -268,5 +247,5 @@ class ProdutoAppService:
             nome=produto.nome,
             preco_valor=produto.preco.valor,
             preco_moeda=produto.preco.moeda.codigo,
-            ativo=produto.ativo
-        ) 
+            ativo=produto.ativo,
+        )

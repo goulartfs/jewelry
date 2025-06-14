@@ -8,10 +8,10 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional
 
-from ...domain.entities.usuario import Usuario
-from ...domain.entities.empresa import Empresa
 from ...domain.entities.autorizacao import Perfil
 from ...domain.entities.dados_pessoais import DadoPessoal
+from ...domain.entities.empresa import Empresa
+from ...domain.entities.usuario import Usuario
 from ...domain.repositories.usuario import UsuarioRepository
 from .base import UseCase
 
@@ -19,6 +19,7 @@ from .base import UseCase
 @dataclass
 class CriarUsuarioInput:
     """Dados de entrada para criação de usuário."""
+
     username: str
     email: str
     senha: str
@@ -59,7 +60,7 @@ class CriarUsuarioUseCase(UseCase[CriarUsuarioInput, Usuario]):
             perfil=input_data.perfil,
             dados_pessoais=input_data.dados_pessoais,
             empresa=input_data.empresa,
-            data_ultimo_acesso=datetime.now()
+            data_ultimo_acesso=datetime.now(),
         )
 
         return self.usuario_repository.criar(usuario)
@@ -68,6 +69,7 @@ class CriarUsuarioUseCase(UseCase[CriarUsuarioInput, Usuario]):
 @dataclass
 class AtualizarUsuarioInput:
     """Dados de entrada para atualização de usuário."""
+
     id: int
     email: Optional[str] = None
     senha: Optional[str] = None
@@ -100,9 +102,9 @@ class AtualizarUsuarioUseCase(UseCase[AtualizarUsuarioInput, Usuario]):
             raise ValueError("Usuário não encontrado")
 
         if (
-            input_data.email and
-            input_data.email != usuario.email and
-            self.usuario_repository.buscar_por_email(input_data.email)
+            input_data.email
+            and input_data.email != usuario.email
+            and self.usuario_repository.buscar_por_email(input_data.email)
         ):
             raise ValueError("Email já está em uso")
 
@@ -159,4 +161,4 @@ class ListarUsuariosEmpresaUseCase(UseCase[int, List[Usuario]]):
         Returns:
             Lista de usuários da empresa
         """
-        return self.usuario_repository.buscar_por_empresa(empresa_id) 
+        return self.usuario_repository.buscar_por_empresa(empresa_id)

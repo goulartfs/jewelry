@@ -6,13 +6,31 @@ Este módulo contém os testes unitários para as entidades e serviços do módu
 import unittest
 from datetime import datetime
 from decimal import Decimal
+
 from joias.domain.alpha import (
-    Usuario, Contato, DadoPessoal, Endereco, Empresa,
-    Permissao, Perfil, Produto, Catalogo, Pedido, ItemPedido,
-    Preco, Detalhe, Variacao,
-    UsuarioService, ContatoService, DadoPessoalService,
-    EmpresaService, PermissaoService, PerfilService,
-    ProdutoService, CatalogoService, PedidoService
+    Catalogo,
+    CatalogoService,
+    Contato,
+    ContatoService,
+    DadoPessoal,
+    DadoPessoalService,
+    Detalhe,
+    Empresa,
+    EmpresaService,
+    Endereco,
+    ItemPedido,
+    Pedido,
+    PedidoService,
+    Perfil,
+    PerfilService,
+    Permissao,
+    PermissaoService,
+    Preco,
+    Produto,
+    ProdutoService,
+    Usuario,
+    UsuarioService,
+    Variacao,
 )
 
-# ... rest of the existing code ... 
+# ... rest of the existing code ...

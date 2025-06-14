@@ -8,10 +8,10 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import List, Optional
 
-from ...domain.entities.pedido import Pedido, ItemPedido, StatusPedido
+from ...domain.entities.dados_pessoais import Endereco
+from ...domain.entities.pedido import ItemPedido, Pedido, StatusPedido
 from ...domain.entities.produto import Produto, Variacao
 from ...domain.entities.usuario import Usuario
-from ...domain.entities.dados_pessoais import Endereco
 from ...domain.repositories.pedido import PedidoRepository
 from ...domain.repositories.produto import ProdutoRepository
 from .base import UseCase
@@ -20,6 +20,7 @@ from .base import UseCase
 @dataclass
 class CriarPedidoInput:
     """Dados de entrada para criação de pedido."""
+
     cliente: Usuario
     endereco_entrega: Optional[Endereco] = None
     observacoes: Optional[str] = None
@@ -44,7 +45,7 @@ class CriarPedidoUseCase(UseCase[CriarPedidoInput, Pedido]):
         pedido = Pedido(
             cliente=input_data.cliente,
             endereco_entrega=input_data.endereco_entrega,
-            observacoes=input_data.observacoes
+            observacoes=input_data.observacoes,
         )
 
         return self.pedido_repository.criar(pedido)
@@ -53,6 +54,7 @@ class CriarPedidoUseCase(UseCase[CriarPedidoInput, Pedido]):
 @dataclass
 class AdicionarItemInput:
     """Dados de entrada para adicionar item ao pedido."""
+
     pedido_id: int
     produto_id: int
     quantidade: int
@@ -64,9 +66,7 @@ class AdicionarItemUseCase(UseCase[AdicionarItemInput, Pedido]):
     """Caso de uso para adicionar um item a um pedido."""
 
     def __init__(
-        self,
-        pedido_repository: PedidoRepository,
-        produto_repository: ProdutoRepository
+        self, pedido_repository: PedidoRepository, produto_repository: ProdutoRepository
     ):
         self.pedido_repository = pedido_repository
         self.produto_repository = produto_repository
@@ -98,8 +98,7 @@ class AdicionarItemUseCase(UseCase[AdicionarItemInput, Pedido]):
         variacao = None
         if input_data.variacao_id:
             variacao = next(
-                (v for v in produto.variacoes if v.id == input_data.variacao_id),
-                None
+                (v for v in produto.variacoes if v.id == input_data.variacao_id), None
             )
             if not variacao:
                 raise ValueError("Variação não encontrada")
@@ -109,7 +108,7 @@ class AdicionarItemUseCase(UseCase[AdicionarItemInput, Pedido]):
             quantidade=input_data.quantidade,
             preco_unitario=produto.preco.valor,
             variacao=variacao,
-            desconto=input_data.desconto
+            desconto=input_data.desconto,
         )
 
         pedido.adicionar_item(item)
@@ -119,6 +118,7 @@ class AdicionarItemUseCase(UseCase[AdicionarItemInput, Pedido]):
 @dataclass
 class AtualizarPedidoInput:
     """Dados de entrada para atualização de pedido."""
+
     id: int
     endereco_entrega: Optional[Endereco] = None
     observacoes: Optional[str] = None
@@ -164,6 +164,7 @@ class AtualizarPedidoUseCase(UseCase[AtualizarPedidoInput, Pedido]):
 @dataclass
 class AtualizarStatusInput:
     """Dados de entrada para atualização de status do pedido."""
+
     pedido_id: int
     novo_status: StatusPedido
 
@@ -227,4 +228,4 @@ class ListarPedidosAtivosUseCase(UseCase[None, List[Pedido]]):
         Returns:
             Lista de pedidos ativos
         """
-        return self.pedido_repository.buscar_pedidos_ativos() 
+        return self.pedido_repository.buscar_pedidos_ativos()

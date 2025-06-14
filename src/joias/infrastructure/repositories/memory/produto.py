@@ -6,11 +6,11 @@ variações e detalhes em memória para testes.
 """
 from typing import List, Optional
 
-from ....domain.entities.produto import Produto, Variacao, Detalhe
+from ....domain.entities.produto import Detalhe, Produto, Variacao
 from ....domain.repositories.produto import (
+    DetalheRepository,
     ProdutoRepository,
     VariacaoRepository,
-    DetalheRepository
 )
 from .base import MemoryRepository
 
@@ -18,7 +18,7 @@ from .base import MemoryRepository
 class MemoryProdutoRepository(MemoryRepository[Produto], ProdutoRepository):
     """
     Implementação do repositório de produtos em memória.
-    
+
     Esta implementação é útil para testes e desenvolvimento.
     """
 
@@ -32,10 +32,7 @@ class MemoryProdutoRepository(MemoryRepository[Produto], ProdutoRepository):
         Returns:
             O produto encontrado ou None se não existir
         """
-        return next(
-            (p for p in self._items.values() if p.codigo == codigo),
-            None
-        )
+        return next((p for p in self._items.values() if p.codigo == codigo), None)
 
     def buscar_por_nome(self, nome: str) -> List[Produto]:
         """
@@ -48,10 +45,7 @@ class MemoryProdutoRepository(MemoryRepository[Produto], ProdutoRepository):
             Lista de produtos encontrados
         """
         nome = nome.lower()
-        return [
-            p for p in self._items.values()
-            if nome in p.nome.lower()
-        ]
+        return [p for p in self._items.values() if nome in p.nome.lower()]
 
     def buscar_por_variacao(self, variacao_id: int) -> Optional[Produto]:
         """
@@ -65,11 +59,12 @@ class MemoryProdutoRepository(MemoryRepository[Produto], ProdutoRepository):
         """
         return next(
             (
-                p for p in self._items.values()
+                p
+                for p in self._items.values()
                 for v in p.variacoes
                 if v.id == variacao_id
             ),
-            None
+            None,
         )
 
     def buscar_por_detalhe(self, tipo: str, valor: str) -> List[Produto]:
@@ -84,18 +79,16 @@ class MemoryProdutoRepository(MemoryRepository[Produto], ProdutoRepository):
             Lista de produtos encontrados
         """
         return [
-            p for p in self._items.values()
-            if any(
-                d.tipo == tipo and d.valor == valor
-                for d in p.detalhes
-            )
+            p
+            for p in self._items.values()
+            if any(d.tipo == tipo and d.valor == valor for d in p.detalhes)
         ]
 
 
 class MemoryVariacaoRepository(MemoryRepository[Variacao], VariacaoRepository):
     """
     Implementação do repositório de variações em memória.
-    
+
     Esta implementação é útil para testes e desenvolvimento.
     """
 
@@ -109,10 +102,7 @@ class MemoryVariacaoRepository(MemoryRepository[Variacao], VariacaoRepository):
         Returns:
             A variação encontrada ou None se não existir
         """
-        return next(
-            (v for v in self._items.values() if v.codigo == codigo),
-            None
-        )
+        return next((v for v in self._items.values() if v.codigo == codigo), None)
 
     def buscar_por_produto(self, produto_id: int) -> List[Variacao]:
         """
@@ -132,7 +122,7 @@ class MemoryVariacaoRepository(MemoryRepository[Variacao], VariacaoRepository):
 class MemoryDetalheRepository(MemoryRepository[Detalhe], DetalheRepository):
     """
     Implementação do repositório de detalhes em memória.
-    
+
     Esta implementação é útil para testes e desenvolvimento.
     """
 
@@ -146,10 +136,7 @@ class MemoryDetalheRepository(MemoryRepository[Detalhe], DetalheRepository):
         Returns:
             Lista de detalhes do tipo especificado
         """
-        return [
-            d for d in self._items.values()
-            if d.tipo == tipo
-        ]
+        return [d for d in self._items.values() if d.tipo == tipo]
 
     def buscar_por_produto(self, produto_id: int) -> List[Detalhe]:
         """
@@ -177,4 +164,4 @@ class MemoryDetalheRepository(MemoryRepository[Detalhe], DetalheRepository):
         """
         # Na implementação em memória, os detalhes são armazenados
         # diretamente na variação, então este método não é usado
-        return [] 
+        return []

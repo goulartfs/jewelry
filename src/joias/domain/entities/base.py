@@ -13,10 +13,11 @@ from typing import Optional
 class Entity(ABC):
     """
     Classe base para todas as entidades do domínio.
-    
+
     Uma entidade é um objeto que tem uma identidade única e é distinguível
     mesmo quando seus atributos são idênticos.
     """
+
     id: int
     data_criacao: datetime = field(default_factory=datetime.now)
     data_atualizacao: Optional[datetime] = None
@@ -42,4 +43,4 @@ class Entity(ABC):
     def ativar(self) -> None:
         """Ativa a entidade."""
         self.ativo = True
-        self.atualizar() 
+        self.atualizar()

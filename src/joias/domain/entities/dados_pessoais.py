@@ -15,10 +15,11 @@ from .base import Entity
 class Endereco(Entity):
     """
     Entidade que representa um endereço físico.
-    
+
     Um endereço é um local físico que pode estar associado
     a uma pessoa ou empresa.
     """
+
     logradouro: str
     numero: str
     bairro: str
@@ -41,7 +42,7 @@ class Endereco(Entity):
             self.bairro,
             f"{self.cidade} - {self.estado}",
             f"CEP: {self.cep}",
-            self.pais
+            self.pais,
         ]
         return ", ".join(p for p in partes if p)
 
@@ -50,10 +51,11 @@ class Endereco(Entity):
 class DadoPessoal(Entity):
     """
     Entidade que representa os dados pessoais de um indivíduo.
-    
+
     Contém informações pessoais como nome, documentos e endereços
     associados à pessoa.
     """
+
     nome: str
     cpf: str
     data_nascimento: datetime
@@ -77,10 +79,7 @@ class DadoPessoal(Entity):
         Args:
             endereco_id: ID do endereço a ser removido
         """
-        self.enderecos = [
-            e for e in self.enderecos
-            if e.id != endereco_id
-        ]
+        self.enderecos = [e for e in self.enderecos if e.id != endereco_id]
         self.atualizar()
 
     def obter_endereco_principal(self) -> Optional[Endereco]:
@@ -91,4 +90,4 @@ class DadoPessoal(Entity):
             O primeiro endereço ativo ou None se não houver endereços
         """
         enderecos_ativos = [e for e in self.enderecos if e.ativo]
-        return enderecos_ativos[0] if enderecos_ativos else None 
+        return enderecos_ativos[0] if enderecos_ativos else None

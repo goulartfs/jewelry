@@ -6,13 +6,14 @@ como tecnologia de persistência.
 """
 from decimal import Decimal
 from typing import List, Optional
-from sqlalchemy.orm import Session
+
 from sqlalchemy import and_
+from sqlalchemy.orm import Session
 
 from .....domain.catalogo.entities.produto import Produto
 from .....domain.catalogo.repositories.produto_repository import ProdutoRepository
-from ..models.produto import ProdutoModel
 from ..mappers.produto_mapper import ProdutoMapper
+from ..models.produto import ProdutoModel
 
 
 class SQLAlchemyProdutoRepository(ProdutoRepository):
@@ -74,9 +75,7 @@ class SQLAlchemyProdutoRepository(ProdutoRepository):
             Optional[Produto]: O produto encontrado ou None
         """
         model = (
-            self._session.query(ProdutoModel)
-            .filter(ProdutoModel.sku == sku)
-            .first()
+            self._session.query(ProdutoModel).filter(ProdutoModel.sku == sku).first()
         )
         if not model:
             return None
@@ -98,9 +97,7 @@ class SQLAlchemyProdutoRepository(ProdutoRepository):
         return [self._mapper.to_entity(model) for model in query.all()]
 
     def buscar_por_faixa_de_preco(
-        self,
-        preco_minimo: Decimal,
-        preco_maximo: Decimal
+        self, preco_minimo: Decimal, preco_maximo: Decimal
     ) -> List[Produto]:
         """
         Busca produtos por faixa de preço.
@@ -118,7 +115,7 @@ class SQLAlchemyProdutoRepository(ProdutoRepository):
                 and_(
                     ProdutoModel.preco_valor >= preco_minimo,
                     ProdutoModel.preco_valor <= preco_maximo,
-                    ProdutoModel.ativo == True
+                    ProdutoModel.ativo == True,
                 )
             )
             .all()
@@ -141,7 +138,7 @@ class SQLAlchemyProdutoRepository(ProdutoRepository):
 
         updated_model = self._mapper.to_model(produto)
         for key, value in updated_model.__dict__.items():
-            if not key.startswith('_'):
+            if not key.startswith("_"):
                 setattr(model, key, value)
 
         self._session.commit()
@@ -163,4 +160,4 @@ class SQLAlchemyProdutoRepository(ProdutoRepository):
 
         self._session.delete(model)
         self._session.commit()
-        return True 
+        return True

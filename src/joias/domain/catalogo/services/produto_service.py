@@ -7,9 +7,9 @@ relacionada a produtos que não pertence naturalmente a nenhuma entidade.
 from decimal import Decimal
 from typing import List, Optional
 
-from ..entities.produto import Produto, Variacao, Detalhe
-from ..repositories.produto_repository import ProdutoRepository
 from ...shared.value_objects.preco import Preco
+from ..entities.produto import Detalhe, Produto, Variacao
+from ..repositories.produto_repository import ProdutoRepository
 
 
 class ProdutoService:
@@ -30,11 +30,7 @@ class ProdutoService:
         self._repository = produto_repository
 
     def criar_produto(
-        self,
-        sku: str,
-        nome: str,
-        descricao: str,
-        preco: Preco
+        self, sku: str, nome: str, descricao: str, preco: Preco
     ) -> Produto:
         """
         Cria um novo produto.
@@ -54,21 +50,12 @@ class ProdutoService:
         if self._repository.buscar_por_sku(sku):
             raise ValueError(f"Já existe um produto com o SKU {sku}")
 
-        produto = Produto(
-            sku=sku,
-            nome=nome,
-            descricao=descricao,
-            preco=preco
-        )
+        produto = Produto(sku=sku, nome=nome, descricao=descricao, preco=preco)
 
         return self._repository.salvar(produto)
 
     def adicionar_variacao(
-        self,
-        produto_id: int,
-        nome: str,
-        descricao: str,
-        codigo: str
+        self, produto_id: int, nome: str, descricao: str, codigo: str
     ) -> Optional[Produto]:
         """
         Adiciona uma variação a um produto.
@@ -86,21 +73,13 @@ class ProdutoService:
         if not produto:
             return None
 
-        variacao = Variacao(
-            nome=nome,
-            descricao=descricao,
-            codigo=codigo
-        )
+        variacao = Variacao(nome=nome, descricao=descricao, codigo=codigo)
 
         produto.adicionar_variacao(variacao)
         return self._repository.atualizar(produto)
 
     def adicionar_detalhe(
-        self,
-        produto_id: int,
-        nome: str,
-        valor: str,
-        tipo: str
+        self, produto_id: int, nome: str, valor: str, tipo: str
     ) -> Optional[Produto]:
         """
         Adiciona um detalhe a um produto.
@@ -118,20 +97,12 @@ class ProdutoService:
         if not produto:
             return None
 
-        detalhe = Detalhe(
-            nome=nome,
-            valor=valor,
-            tipo=tipo
-        )
+        detalhe = Detalhe(nome=nome, valor=valor, tipo=tipo)
 
         produto.adicionar_detalhe(detalhe)
         return self._repository.atualizar(produto)
 
-    def atualizar_preco(
-        self,
-        produto_id: int,
-        novo_preco: Preco
-    ) -> Optional[Produto]:
+    def atualizar_preco(self, produto_id: int, novo_preco: Preco) -> Optional[Produto]:
         """
         Atualiza o preço de um produto.
 
@@ -150,9 +121,7 @@ class ProdutoService:
         return self._repository.atualizar(produto)
 
     def buscar_por_faixa_de_preco(
-        self,
-        preco_minimo: Decimal,
-        preco_maximo: Decimal
+        self, preco_minimo: Decimal, preco_maximo: Decimal
     ) -> List[Produto]:
         """
         Busca produtos por faixa de preço.
@@ -164,10 +133,7 @@ class ProdutoService:
         Returns:
             List[Produto]: Lista de produtos na faixa de preço
         """
-        return self._repository.buscar_por_faixa_de_preco(
-            preco_minimo,
-            preco_maximo
-        )
+        return self._repository.buscar_por_faixa_de_preco(preco_minimo, preco_maximo)
 
     def desativar_produto(self, produto_id: int) -> bool:
         """
@@ -201,4 +167,4 @@ class ProdutoService:
             return False
 
         produto.ativar()
-        return self._repository.atualizar(produto) is not None 
+        return self._repository.atualizar(produto) is not None

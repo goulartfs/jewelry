@@ -4,15 +4,23 @@ Modelos do SQLAlchemy.
 Este módulo define os modelos do SQLAlchemy que mapeiam
 as entidades do domínio para tabelas do banco de dados.
 """
+import uuid
 from datetime import datetime
 from typing import Optional
+
 from sqlalchemy import (
-    Column, Integer, String, Float, DateTime,
-    ForeignKey, Boolean, Table, Text
+    Boolean,
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Table,
+    Text,
 )
-from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy.dialects.postgresql import UUID
-import uuid
+from sqlalchemy.orm import declarative_base, relationship
 
 # Cria a classe base para os modelos
 Base = declarative_base()
@@ -20,16 +28,17 @@ Base = declarative_base()
 
 # Tabelas de associação
 produto_categoria = Table(
-    'produto_categoria',
+    "produto_categoria",
     Base.metadata,
-    Column('produto_id', UUID(as_uuid=True), ForeignKey('produtos.id')),
-    Column('categoria_id', UUID(as_uuid=True), ForeignKey('categorias.id'))
+    Column("produto_id", UUID(as_uuid=True), ForeignKey("produtos.id")),
+    Column("categoria_id", UUID(as_uuid=True), ForeignKey("categorias.id")),
 )
 
 
 class Usuario(Base):
     """Modelo para usuários do sistema."""
-    __tablename__ = 'usuarios'
+
+    __tablename__ = "usuarios"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String(255), unique=True, nullable=False)
@@ -41,14 +50,17 @@ class Usuario(Base):
     deleted_at = Column(DateTime, nullable=True)
 
     # Relacionamentos
-    perfis = relationship('Perfil', secondary='usuario_perfil', back_populates='usuarios')
-    empresa_id = Column(UUID(as_uuid=True), ForeignKey('empresas.id'))
-    empresa = relationship('Empresa', back_populates='usuarios')
+    perfis = relationship(
+        "Perfil", secondary="usuario_perfil", back_populates="usuarios"
+    )
+    empresa_id = Column(UUID(as_uuid=True), ForeignKey("empresas.id"))
+    empresa = relationship("Empresa", back_populates="usuarios")
 
 
 class Empresa(Base):
     """Modelo para empresas."""
-    __tablename__ = 'empresas'
+
+    __tablename__ = "empresas"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     nome = Column(String(255), nullable=False)
@@ -58,13 +70,14 @@ class Empresa(Base):
     deleted_at = Column(DateTime, nullable=True)
 
     # Relacionamentos
-    usuarios = relationship('Usuario', back_populates='empresa')
-    enderecos = relationship('Endereco', back_populates='empresa')
+    usuarios = relationship("Usuario", back_populates="empresa")
+    enderecos = relationship("Endereco", back_populates="empresa")
 
 
 class Endereco(Base):
     """Modelo para endereços."""
-    __tablename__ = 'enderecos'
+
+    __tablename__ = "enderecos"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     logradouro = Column(String(255), nullable=False)
@@ -79,13 +92,14 @@ class Endereco(Base):
     deleted_at = Column(DateTime, nullable=True)
 
     # Relacionamentos
-    empresa_id = Column(UUID(as_uuid=True), ForeignKey('empresas.id'))
-    empresa = relationship('Empresa', back_populates='enderecos')
+    empresa_id = Column(UUID(as_uuid=True), ForeignKey("empresas.id"))
+    empresa = relationship("Empresa", back_populates="enderecos")
 
 
 class Perfil(Base):
     """Modelo para perfis de usuário."""
-    __tablename__ = 'perfis'
+
+    __tablename__ = "perfis"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     nome = Column(String(255), nullable=False)
@@ -95,13 +109,18 @@ class Perfil(Base):
     deleted_at = Column(DateTime, nullable=True)
 
     # Relacionamentos
-    usuarios = relationship('Usuario', secondary='usuario_perfil', back_populates='perfis')
-    permissoes = relationship('Permissao', secondary='perfil_permissao', back_populates='perfis')
+    usuarios = relationship(
+        "Usuario", secondary="usuario_perfil", back_populates="perfis"
+    )
+    permissoes = relationship(
+        "Permissao", secondary="perfil_permissao", back_populates="perfis"
+    )
 
 
 class Permissao(Base):
     """Modelo para permissões."""
-    __tablename__ = 'permissoes'
+
+    __tablename__ = "permissoes"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     nome = Column(String(255), nullable=False)
@@ -111,20 +130,22 @@ class Permissao(Base):
     deleted_at = Column(DateTime, nullable=True)
 
     # Relacionamentos
-    perfis = relationship('Perfil', secondary='perfil_permissao', back_populates='permissoes')
+    perfis = relationship(
+        "Perfil", secondary="perfil_permissao", back_populates="permissoes"
+    )
 
 
 # Tabelas de associação para relacionamentos many-to-many
 usuario_perfil = Table(
-    'usuario_perfil',
+    "usuario_perfil",
     Base.metadata,
-    Column('usuario_id', UUID(as_uuid=True), ForeignKey('usuarios.id')),
-    Column('perfil_id', UUID(as_uuid=True), ForeignKey('perfis.id'))
+    Column("usuario_id", UUID(as_uuid=True), ForeignKey("usuarios.id")),
+    Column("perfil_id", UUID(as_uuid=True), ForeignKey("perfis.id")),
 )
 
 perfil_permissao = Table(
-    'perfil_permissao',
+    "perfil_permissao",
     Base.metadata,
-    Column('perfil_id', UUID(as_uuid=True), ForeignKey('perfis.id')),
-    Column('permissao_id', UUID(as_uuid=True), ForeignKey('permissoes.id'))
-) 
+    Column("perfil_id", UUID(as_uuid=True), ForeignKey("perfis.id")),
+    Column("permissao_id", UUID(as_uuid=True), ForeignKey("permissoes.id")),
+)

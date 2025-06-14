@@ -6,6 +6,4 @@ relacionadas à identidade e acesso no sistema.
 """
 from .entities.usuario import Usuario
 
-__all__ = [
-    'Usuario'
-] 
+__all__ = ["Usuario"]

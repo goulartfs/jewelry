@@ -5,12 +5,12 @@ Este módulo define a interface base que todos os repositórios devem
 implementar, seguindo os princípios do Domain-Driven Design.
 """
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, Optional, List
+from typing import Generic, List, Optional, TypeVar
 from uuid import UUID
 
 from ..entities.aggregate_root import AggregateRoot
 
-T = TypeVar('T', bound=AggregateRoot)
+T = TypeVar("T", bound=AggregateRoot)
 
 
 class Repository(Generic[T], ABC):
@@ -88,4 +88,4 @@ class Repository(Generic[T], ABC):
         Returns:
             bool: True se removido com sucesso, False caso contrário
         """
-        pass 
+        pass

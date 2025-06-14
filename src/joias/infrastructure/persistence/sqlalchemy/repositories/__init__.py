@@ -6,6 +6,4 @@ usando SQLAlchemy como mecanismo de persistência.
 """
 from .usuario_repository import UsuarioRepository
 
-__all__ = [
-    'UsuarioRepository'
-] 
+__all__ = ["UsuarioRepository"]

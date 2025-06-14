@@ -1,30 +1,30 @@
 version: '3.8'
 
 services:
-  web:
+  api:
     build: .
-    command: uvicorn src.joias.presentation.api.main:app --host 0.0.0.0 --port 8000 --reload
-    volumes:
-      - .:/app
     ports:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/joias
-      - SECRET_KEY=your-secret-key
-      - ENVIRONMENT=development
+      - SECRET_KEY=sua-chave-secreta
+      - DEBUG=1
     depends_on:
       - db
+    volumes:
+      - .:/app
+    command: uvicorn src.joias.presentation.api.main:app --host 0.0.0.0 --port 8000 --reload
 
   db:
     image: postgres:13
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=joias
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
   postgres_data: 

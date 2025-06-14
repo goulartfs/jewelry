@@ -16,6 +16,7 @@ class Endereco:
     Este é um objeto de valor imutável que encapsula todos os dados
     necessários para representar um endereço físico completo.
     """
+
     logradouro: str
     numero: str
     bairro: str
@@ -39,12 +40,12 @@ class Endereco:
             raise ValueError("O estado não pode estar vazio")
         if not self.cep:
             raise ValueError("O CEP não pode estar vazio")
-        
+
         # Remove espaços extras e formata o CEP
-        object.__setattr__(self, 'cep', self._formatar_cep(self.cep))
-        
+        object.__setattr__(self, "cep", self._formatar_cep(self.cep))
+
         # Garante que estado está em maiúsculas
-        object.__setattr__(self, 'estado', self.estado.upper())
+        object.__setattr__(self, "estado", self.estado.upper())
 
     def _formatar_cep(self, cep: str) -> str:
         """
@@ -60,11 +61,11 @@ class Endereco:
             ValueError: Se o CEP não tiver 8 dígitos após a formatação
         """
         # Remove todos os caracteres não numéricos
-        cep_limpo = ''.join(filter(str.isdigit, cep))
-        
+        cep_limpo = "".join(filter(str.isdigit, cep))
+
         if len(cep_limpo) != 8:
             raise ValueError("O CEP deve ter 8 dígitos")
-        
+
         # Formata o CEP como XXXXX-XXX
         return f"{cep_limpo[:5]}-{cep_limpo[5:]}"
 
@@ -76,6 +77,6 @@ class Endereco:
             self.bairro,
             f"{self.cidade}/{self.estado}",
             self.cep,
-            self.pais if self.pais != "Brasil" else None
+            self.pais if self.pais != "Brasil" else None,
         ]
-        return ", ".join(p for p in partes if p) 
+        return ", ".join(p for p in partes if p)

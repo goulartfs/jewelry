@@ -9,10 +9,28 @@ from .domain import *
 
 __all__ = [
     # Re-export everything from domain module
-    'Usuario', 'Contato', 'DadoPessoal', 'Endereco', 'Empresa',
-    'Permissao', 'Perfil', 'Produto', 'Catalogo', 'Pedido', 'ItemPedido',
-    'Preco', 'Detalhe', 'Variacao',
-    'BaseService', 'UsuarioService', 'ContatoService', 'DadoPessoalService',
-    'EmpresaService', 'PermissaoService', 'PerfilService', 'ProdutoService',
-    'CatalogoService', 'PedidoService'
-] 
+    "Usuario",
+    "Contato",
+    "DadoPessoal",
+    "Endereco",
+    "Empresa",
+    "Permissao",
+    "Perfil",
+    "Produto",
+    "Catalogo",
+    "Pedido",
+    "ItemPedido",
+    "Preco",
+    "Detalhe",
+    "Variacao",
+    "BaseService",
+    "UsuarioService",
+    "ContatoService",
+    "DadoPessoalService",
+    "EmpresaService",
+    "PermissaoService",
+    "PerfilService",
+    "ProdutoService",
+    "CatalogoService",
+    "PedidoService",
+]

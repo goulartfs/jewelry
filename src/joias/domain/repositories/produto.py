@@ -7,7 +7,7 @@ e suas implementações.
 from abc import abstractmethod
 from typing import List, Optional
 
-from ..entities.produto import Produto, Variacao, Detalhe
+from ..entities.produto import Detalhe, Produto, Variacao
 from .base import Repository
 
 
@@ -138,4 +138,4 @@ class DetalheRepository(Repository[Detalhe]):
         Returns:
             Lista de detalhes da variação
         """
-        pass 
+        pass

@@ -5,8 +5,8 @@ Esta é uma entidade do domínio que representa um fornecedor de produtos,
 com seus documentos, endereço e produtos fornecidos.
 """
 from dataclasses import dataclass, field
-from typing import List, Optional
 from datetime import datetime
+from typing import List, Optional
 
 from ...shared.value_objects.endereco import Endereco
 from .produto import Produto
@@ -20,6 +20,7 @@ class Documento:
     Este é um objeto de valor que encapsula os dados de um documento
     de identificação, como CNPJ, CPF, etc.
     """
+
     numero: str
     tipo: str
 
@@ -29,13 +30,13 @@ class Documento:
             raise ValueError("O número do documento não pode estar vazio")
         if not self.tipo:
             raise ValueError("O tipo do documento não pode estar vazio")
-        
+
         # Remove caracteres não numéricos do número
-        self.numero = ''.join(filter(str.isdigit, self.numero))
-        
+        self.numero = "".join(filter(str.isdigit, self.numero))
+
         # Converte o tipo para maiúsculas
         self.tipo = self.tipo.upper()
-        
+
         # Valida o tipo de documento
         if self.tipo == "CNPJ" and len(self.numero) != 14:
             raise ValueError("CNPJ deve ter 14 dígitos")
@@ -56,7 +57,9 @@ class Documento:
 
     def _formatar_cpf(self) -> str:
         """Formata o número como CPF: XXX.XXX.XXX-XX."""
-        return f"{self.numero[:3]}.{self.numero[3:6]}.{self.numero[6:9]}-{self.numero[9:]}"
+        return (
+            f"{self.numero[:3]}.{self.numero[3:6]}.{self.numero[6:9]}-{self.numero[9:]}"
+        )
 
 
 @dataclass
@@ -67,6 +70,7 @@ class Fornecedor:
     Esta é uma entidade rica que encapsula toda a lógica relacionada
     a um fornecedor, incluindo seus documentos, endereço e produtos.
     """
+
     nome: str
     documentos: List[Documento]
     endereco: Endereco
@@ -156,4 +160,4 @@ class Fornecedor:
         """Retorna uma representação string do fornecedor."""
         status = "ativo" if self.ativo else "inativo"
         documentos_str = ", ".join(str(doc) for doc in self.documentos)
-        return f"{self.nome} ({status}) - Documentos: [{documentos_str}]" 
+        return f"{self.nome} ({status}) - Documentos: [{documentos_str}]"

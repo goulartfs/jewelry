@@ -799,3 +799,33 @@ POST /permissoes
       "detail": "Chave de permissão já cadastrada: ACCESS_ALL"
   }
   ```
+
+### US12: Visualização de Permissão
+
+Endpoint para consultar os detalhes de uma permissão específica.
+
+```http
+GET /permissoes/{id}
+```
+
+**Observações:**
+- O endpoint retorna todos os detalhes da permissão
+- A chave é retornada em maiúsculas
+- Requer autenticação e permissões adequadas
+
+**Respostas:**
+- `200 OK`: Permissão encontrada
+  ```json
+  {
+      "id": "123e4567-e89b-12d3-a456-426614174000",
+      "nome": "Acesso Total",
+      "chave": "ACCESS_ALL",
+      "descricao": "Permite acesso total ao sistema"
+  }
+  ```
+- `404 Not Found`: Permissão não encontrada
+  ```json
+  {
+      "detail": "Permissão não encontrada"
+  }
+  ```

@@ -48,14 +48,15 @@ def criar_permissao(
     description="Retorna os dados de uma permissão específica",
 )
 def buscar_permissao(
-    id: str, repository: IPermissaoRepository = Depends(get_permissao_repository)
+    id: str,
+    permissao_repository: IPermissaoRepository = Depends(get_permissao_repository),
 ) -> PermissaoDTO:
     """
     Busca uma permissão pelo ID.
 
     Args:
         id: ID da permissão
-        repository: Repositório de permissões (injetado)
+        permissao_repository: Repositório de permissões (injetado)
 
     Returns:
         Dados da permissão
@@ -63,7 +64,7 @@ def buscar_permissao(
     Raises:
         HTTPException: Se a permissão não for encontrada
     """
-    service = PermissaoService(repository)
+    service = PermissaoService(permissao_repository)
     permissao = service.buscar_permissao(id)
 
     if not permissao:

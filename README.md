@@ -729,3 +729,32 @@ PUT /perfis/{id}
       "detail": "Nome de perfil já cadastrado: Administrador Sênior"
   }
   ```
+
+### US10: Exclusão de Perfil
+
+Endpoint para excluir um perfil do sistema.
+
+```http
+DELETE /perfis/{id}
+```
+
+**Observações:**
+- A exclusão é permanente e não pode ser desfeita
+- Não é possível excluir um perfil que possui permissões associadas
+- É necessário remover todas as permissões do perfil antes de excluí-lo
+- Requer autenticação e permissões adequadas
+
+**Respostas:**
+- `204 No Content`: Perfil excluído com sucesso
+- `404 Not Found`: Perfil não encontrado
+  ```json
+  {
+      "detail": "Perfil não encontrado"
+  }
+  ```
+- `409 Conflict`: Perfil possui permissões associadas
+  ```json
+  {
+      "detail": "Não é possível excluir um perfil que possui permissões associadas"
+  }
+  ```

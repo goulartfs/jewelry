@@ -1,7 +1,7 @@
 """
 Router para endpoints de Perfil.
 """
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 
 from ....application.dtos.perfil import CriarPerfilDTO, PerfilDTO, AtualizarPerfilDTO
@@ -197,4 +197,34 @@ def atualizar_perfil(
         service = PerfilService(perfil_repository, permissao_repository)
         return service.atualizar_perfil(id, dados)
     except ValueError as e:
-        raise HTTPException(status_code=404 if "não encontrado" in str(e) else 400, detail=str(e)) 
+        raise HTTPException(status_code=404 if "não encontrado" in str(e) else 400, detail=str(e))
+
+
+@router.delete(
+    "/{id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    description="Exclui um perfil",
+)
+def excluir_perfil(
+    id: str,
+    perfil_repository: IPerfilRepository = Depends(get_perfil_repository),
+    permissao_repository: IPermissaoRepository = Depends(get_permissao_repository),
+) -> None:
+    """
+    Exclui um perfil do sistema.
+
+    Args:
+        id: ID do perfil
+        perfil_repository: Repositório de perfis (injetado)
+        permissao_repository: Repositório de permissões (injetado)
+
+    Raises:
+        HTTPException: Se o perfil não for encontrado ou não puder ser excluído
+    """
+    try:
+        service = PerfilService(perfil_repository, permissao_repository)
+        service.excluir_perfil(id)
+    except ValueError as e:
+        if "não encontrado" in str(e):
+            raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=409, detail=str(e)) 

@@ -267,4 +267,26 @@ class PerfilService:
                 for p in perfil.permissoes
             ],
             data_criacao=perfil.data_criacao,
-        ) 
+        )
+
+    def excluir_perfil(self, id: str) -> None:
+        """
+        Exclui um perfil do sistema.
+
+        Args:
+            id: ID do perfil
+
+        Raises:
+            ValueError: Se o perfil não existir ou não puder ser excluído
+        """
+        # Busca o perfil
+        perfil = self._perfil_repository.buscar_por_id(id)
+        if not perfil:
+            raise ValueError("Perfil não encontrado")
+
+        # Verifica se o perfil pode ser excluído
+        if perfil.permissoes:
+            raise ValueError("Não é possível excluir um perfil que possui permissões associadas")
+
+        # Exclui o perfil
+        self._perfil_repository.excluir(perfil) 

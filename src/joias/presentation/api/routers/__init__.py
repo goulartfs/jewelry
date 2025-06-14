@@ -6,6 +6,7 @@ organizados por domínio.
 """
 from .auth import router as auth_router
 from .orders import router as orders_router
+from .perfil_router import router as perfil_router
 from .products import router as products_router
 from .suppliers import router as suppliers_router
 from .users import router as users_router
@@ -16,4 +17,5 @@ __all__ = [
     "products_router",
     "orders_router",
     "suppliers_router",
+    "perfil_router",
 ]

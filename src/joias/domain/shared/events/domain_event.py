@@ -1,1 +1,32 @@
-"""Classe base para eventos de domínio.\n\nEsta classe fornece a estrutura básica para eventos de domínio,\nincluindo metadados como data de ocorrência.\n"""\nfrom abc import ABC\nfrom datetime import datetime\nfrom typing import Optional\n\n\nclass DomainEvent(ABC):\n    """Classe base para eventos de domínio."""\n    \n    def __init__(self):\n        """\n        Inicializa um novo evento de domínio.\n        \n        O evento é automaticamente marcado com a data e hora atual\n        de ocorrência.\n        """\n        self._occurred_on: datetime = datetime.now()\n        \n    @property\n    def occurred_on(self) -> datetime:\n        """\n        Retorna a data e hora em que o evento ocorreu.\n        \n        Returns:\n            A data e hora de ocorrência do evento.\n        """\n        return self._occurred_on
+"""
+Classe base para eventos de domínio.
+
+Esta classe fornece a estrutura básica para eventos de domínio,
+incluindo metadados como data de ocorrência.
+"""
+from abc import ABC
+from datetime import datetime
+from typing import Optional
+
+
+class DomainEvent(ABC):
+    """Classe base para eventos de domínio."""
+    
+    def __init__(self):
+        """
+        Inicializa um novo evento de domínio.
+        
+        O evento é automaticamente marcado com a data e hora atual
+        de ocorrência.
+        """
+        self._occurred_on: datetime = datetime.now()
+        
+    @property
+    def occurred_on(self) -> datetime:
+        """
+        Retorna a data e hora em que o evento ocorreu.
+        
+        Returns:
+            A data e hora de ocorrência do evento.
+        """
+        return self._occurred_on

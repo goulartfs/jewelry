@@ -20,4 +20,4 @@ async def health_check():
     Returns:
         dict: Status da aplicação
     """
-    return {"status": "ok"}
+    return {"status": "ok"} 

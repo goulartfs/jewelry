@@ -1,11 +1,11 @@
 """
-Pacote de persistência.
-
-Este pacote contém as implementações de persistência do sistema,
-incluindo SQLAlchemy e outros mecanismos de armazenamento.
+Exporta os módulos do pacote persistence.
 """
-from .sqlalchemy.models import Base
-from .sqlalchemy.repositories.usuario_repository import UsuarioRepository
-from .sqlalchemy.session import get_db
+from src.joias.infrastructure.persistence.sqlalchemy import Base
+from src.joias.infrastructure.persistence.sqlalchemy.repositories import (
+    PerfilRepository,
+    TokenRepository,
+    UsuarioRepository,
+)
 
-__all__ = ["get_db", "Base", "UsuarioRepository"]
+__all__ = ["Base", "PerfilRepository", "TokenRepository", "UsuarioRepository"]

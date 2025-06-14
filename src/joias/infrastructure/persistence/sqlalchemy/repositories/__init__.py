@@ -1,9 +1,14 @@
 """
-Pacote de repositórios SQLAlchemy.
-
-Este pacote contém as implementações dos repositórios
-usando SQLAlchemy como mecanismo de persistência.
+Exporta os repositórios SQLAlchemy.
 """
-from .usuario_repository import UsuarioRepository
+from src.joias.infrastructure.persistence.sqlalchemy.repositories.perfil_repository import (
+    PerfilRepository,
+)
+from src.joias.infrastructure.persistence.sqlalchemy.repositories.token_repository import (
+    TokenRepository,
+)
+from src.joias.infrastructure.persistence.sqlalchemy.repositories.usuario_repository import (
+    UsuarioRepository,
+)
 
-__all__ = ["UsuarioRepository"]
+__all__ = ["PerfilRepository", "TokenRepository", "UsuarioRepository"]

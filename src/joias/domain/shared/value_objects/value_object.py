@@ -1,1 +1,40 @@
-"""Classe base para objetos de valor.\n\nEsta classe fornece a estrutura básica para implementação de\nobjetos de valor, incluindo comparação por valor.\n"""\nfrom abc import ABC\nfrom dataclasses import dataclass\nfrom typing import Any\n\n\n@dataclass(frozen=True)\nclass ValueObject(ABC):\n    """\n    Classe base para objetos de valor.\n    \n    Esta classe usa o decorador @dataclass para gerar automaticamente\n    os métodos __eq__ e __hash__, garantindo que a comparação seja\n    feita por valor e não por referência.\n    \n    O parâmetro frozen=True garante que os objetos de valor sejam\n    imutáveis após sua criação.\n    """\n    \n    def __eq__(self, other: Any) -> bool:\n        """\n        Compara este objeto de valor com outro.\n        \n        A comparação é feita por valor, ou seja, dois objetos de valor\n        são considerados iguais se todos os seus atributos são iguais.\n        \n        Args:\n            other: O objeto a ser comparado.\n            \n        Returns:\n            True se os objetos são iguais, False caso contrário.\n        """\n        if not isinstance(other, ValueObject):\n            return False\n        return self.__dict__ == other.__dict__
+"""
+Classe base para objetos de valor.
+
+Esta classe fornece a estrutura básica para implementação de
+objetos de valor, incluindo comparação por valor.
+"""
+from abc import ABC
+from dataclasses import dataclass
+from typing import Any
+
+
+@dataclass(frozen=True)
+class ValueObject(ABC):
+    """
+    Classe base para objetos de valor.
+    
+    Esta classe usa o decorador @dataclass para gerar automaticamente
+    os métodos __eq__ e __hash__, garantindo que a comparação seja
+    feita por valor e não por referência.
+    
+    O parâmetro frozen=True garante que os objetos de valor sejam
+    imutáveis após sua criação.
+    """
+    
+    def __eq__(self, other: Any) -> bool:
+        """
+        Compara este objeto de valor com outro.
+        
+        A comparação é feita por valor, ou seja, dois objetos de valor
+        são considerados iguais se todos os seus atributos são iguais.
+        
+        Args:
+            other: O objeto a ser comparado.
+        
+        Returns:
+            True se os objetos são iguais, False caso contrário.
+        """
+        if not isinstance(other, self.__class__):
+            return False
+        return self.__dict__ == other.__dict__

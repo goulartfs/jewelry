@@ -1,35 +1,39 @@
 """
-Configuração da sessão SQLAlchemy.
+Gerenciamento de sessões do SQLAlchemy.
 
-Este módulo configura e fornece a sessão do SQLAlchemy
-para acesso ao banco de dados.
+Este módulo define as funções para gerenciar as sessões
+do SQLAlchemy.
 """
 from typing import Generator
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from ....settings import Settings
-
-# Cria o engine do SQLAlchemy
-engine = create_engine(Settings.DATABASE_URL, pool_pre_ping=True, echo=Settings.DEBUG)
-
-# Cria a fábrica de sessões
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+from src.joias.infrastructure.config import get_settings
 
 
-def get_db() -> Generator[Session, None, None]:
+def get_engine():
     """
-    Retorna uma sessão do banco de dados.
+    Cria e retorna o engine do SQLAlchemy.
+    
+    Returns:
+        Engine do SQLAlchemy
+    """
+    settings = get_settings()
+    return create_engine(settings.database_url)
 
-    Esta função é usada como dependência do FastAPI para
-    injetar sessões do banco de dados nos endpoints.
 
+def get_session() -> Generator[Session, None, None]:
+    """
+    Cria e retorna uma sessão do SQLAlchemy.
+    
     Yields:
-        Uma sessão do SQLAlchemy
+        Sessão do SQLAlchemy
     """
-    db = SessionLocal()
+    engine = get_engine()
+    session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    session = session_factory()
     try:
-        yield db
+        yield session
     finally:
-        db.close()
+        session.close()

@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from ...infrastructure.logging.config import setup_logging
-from .routers import auth, orders, products, suppliers, users
+from .routers import auth, orders, products, suppliers, users, perfil_router
 
 
 def create_app() -> FastAPI:
@@ -43,6 +43,7 @@ def create_app() -> FastAPI:
     app.include_router(products.router, prefix="/api/v1", tags=["products"])
     app.include_router(orders.router, prefix="/api/v1", tags=["orders"])
     app.include_router(suppliers.router, prefix="/api/v1", tags=["suppliers"])
+    app.include_router(perfil_router.router)  # Novo router de perfil
 
     return app
 

@@ -1,1 +1,17 @@
-"""Pacote compartilhado.\n\nEste pacote contém classes e interfaces base compartilhadas\nentre os diferentes contextos do domínio.\n"""\nfrom .entities.aggregate_root import AggregateRoot\nfrom .events.domain_event import DomainEvent\nfrom .value_objects.value_object import ValueObject\nfrom .value_objects.email import Email\n\n__all__ = [\n    "AggregateRoot",\n    "DomainEvent",\n    "ValueObject",\n    "Email"\n]
+"""
+Pacote compartilhado.
+
+Este pacote contém classes e interfaces base compartilhadas
+entre os diferentes contextos do domínio.
+"""
+from .entities.aggregate_root import AggregateRoot
+from .events.domain_event import DomainEvent
+from .value_objects.value_object import ValueObject
+from .value_objects.email import Email
+
+__all__ = [
+    "AggregateRoot",
+    "DomainEvent",
+    "ValueObject",
+    "Email"
+]

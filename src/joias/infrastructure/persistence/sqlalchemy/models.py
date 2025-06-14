@@ -26,15 +26,6 @@ from sqlalchemy.orm import declarative_base, relationship
 Base = declarative_base()
 
 
-# Tabelas de associação
-produto_categoria = Table(
-    "produto_categoria",
-    Base.metadata,
-    Column("produto_id", UUID(as_uuid=True), ForeignKey("produtos.id")),
-    Column("categoria_id", UUID(as_uuid=True), ForeignKey("categorias.id")),
-)
-
-
 class Usuario(Base):
     """Modelo para usuários do sistema."""
 

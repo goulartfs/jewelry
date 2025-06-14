@@ -1,9 +1,13 @@
 """
-Classe base para modelos SQLAlchemy.
+Classe base do SQLAlchemy.
 
-Este módulo define a classe base para todos os modelos
-SQLAlchemy da aplicação.
+Este módulo define a classe base para os modelos
+SQLAlchemy.
 """
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import DeclarativeBase
 
-Base = declarative_base()
+
+class Base(DeclarativeBase):
+    """Classe base para os modelos SQLAlchemy."""
+
+    pass

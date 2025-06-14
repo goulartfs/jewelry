@@ -13,6 +13,7 @@ from src.joias.application.identity.user_service import (
     CriarUsuarioDTO,
     UserService,
     UsuarioDTO,
+    AtualizarUsuarioDTO,
 )
 from src.joias.domain.identity.entities.usuario import Usuario
 from src.joias.domain.shared.value_objects.email import Email
@@ -125,3 +126,114 @@ def test_listar_usuarios(repository_mock, usuario_mock):
     repository_mock.listar.assert_called_once_with(
         pagina=1, tamanho=10, email="joao@email.com", nome="João"
     )
+
+
+def test_atualizar_usuario(repository_mock, usuario_mock):
+    """Deve atualizar um usuário com sucesso."""
+    # Arrange
+    service = UserService(repository_mock)
+    repository_mock.buscar_por_id.return_value = usuario_mock
+    repository_mock.buscar_por_email.return_value = None
+    repository_mock.atualizar.return_value = Usuario(
+        id=usuario_mock.id,
+        nome="João Silva",
+        email=Email("joao.silva@email.com"),
+        senha_hashed="hash123",
+        data_criacao=usuario_mock.data_criacao,
+        ativo=True
+    )
+    
+    dto = AtualizarUsuarioDTO(
+        id=str(usuario_mock.id),
+        nome="João Silva",
+        email="joao.silva@email.com",
+        ativo=True
+    )
+    
+    # Act
+    resultado = service.atualizar_usuario(dto)
+    
+    # Assert
+    assert isinstance(resultado, UsuarioDTO)
+    assert resultado.nome == "João Silva"
+    assert resultado.email == "joao.silva@email.com"
+    assert resultado.ativo is True
+    repository_mock.atualizar.assert_called_once()
+
+
+def test_atualizar_usuario_inexistente(repository_mock):
+    """Deve lançar erro ao atualizar usuário inexistente."""
+    # Arrange
+    service = UserService(repository_mock)
+    repository_mock.buscar_por_id.return_value = None
+    
+    dto = AtualizarUsuarioDTO(
+        id="123",
+        nome="João Silva",
+        email="joao.silva@email.com",
+        ativo=True
+    )
+    
+    # Act & Assert
+    with pytest.raises(ValueError) as exc:
+        service.atualizar_usuario(dto)
+    assert "não encontrado" in str(exc.value).lower()
+    repository_mock.atualizar.assert_not_called()
+
+
+def test_atualizar_usuario_email_duplicado(repository_mock, usuario_mock):
+    """Deve lançar erro ao atualizar usuário com email duplicado."""
+    # Arrange
+    service = UserService(repository_mock)
+    repository_mock.buscar_por_id.return_value = usuario_mock
+    
+    # Simula outro usuário com o mesmo email
+    outro_usuario = Usuario(
+        nome="Outro Usuário",
+        email=Email("joao.silva@email.com"),
+        senha_hashed="hash123"
+    )
+    repository_mock.buscar_por_email.return_value = outro_usuario
+    
+    dto = AtualizarUsuarioDTO(
+        id=str(usuario_mock.id),
+        nome="João Silva",
+        email="joao.silva@email.com",
+        ativo=True
+    )
+    
+    # Act & Assert
+    with pytest.raises(ValueError) as exc:
+        service.atualizar_usuario(dto)
+    assert "já cadastrado" in str(exc.value).lower()
+    repository_mock.atualizar.assert_not_called()
+
+
+def test_atualizar_usuario_parcial(repository_mock, usuario_mock):
+    """Deve atualizar parcialmente um usuário."""
+    # Arrange
+    service = UserService(repository_mock)
+    repository_mock.buscar_por_id.return_value = usuario_mock
+    repository_mock.atualizar.return_value = Usuario(
+        id=usuario_mock.id,
+        nome="João Silva",
+        email=usuario_mock.email,
+        senha_hashed=usuario_mock.senha_hashed,
+        data_criacao=usuario_mock.data_criacao,
+        ativo=usuario_mock.ativo
+    )
+    
+    dto = AtualizarUsuarioDTO(
+        id=str(usuario_mock.id),
+        nome="João Silva"  # Atualiza apenas o nome
+    )
+    
+    # Act
+    resultado = service.atualizar_usuario(dto)
+    
+    # Assert
+    assert isinstance(resultado, UsuarioDTO)
+    assert resultado.nome == "João Silva"
+    assert resultado.email == str(usuario_mock.email)
+    assert resultado.ativo == usuario_mock.ativo
+    repository_mock.atualizar.assert_called_once()

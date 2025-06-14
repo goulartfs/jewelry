@@ -159,3 +159,107 @@ def test_listar_usuarios_filtro_email(client):
     assert response.status_code == 200
     assert len(response.json()) == 1
     assert response.json()[0]["email"] == dados["email"]
+
+
+def test_atualizar_usuario(client):
+    """Deve atualizar um usuário via API."""
+    # Arrange
+    dados_criacao = {"nome": "João da Silva", "email": "joao@email.com", "senha": "senha123"}
+    criado = client.post("/api/usuarios", json=dados_criacao).json()
+    
+    dados_atualizacao = {
+        "nome": "João Silva",
+        "email": "joao.silva@email.com",
+        "ativo": True
+    }
+    
+    # Act
+    response = client.put(f"/api/usuarios/{criado['id']}", json=dados_atualizacao)
+    
+    # Assert
+    assert response.status_code == 200
+    assert response.json()["nome"] == dados_atualizacao["nome"]
+    assert response.json()["email"] == dados_atualizacao["email"]
+    assert response.json()["ativo"] is True
+
+
+def test_atualizar_usuario_inexistente(client):
+    """Deve retornar erro ao atualizar usuário inexistente."""
+    # Arrange
+    dados = {
+        "nome": "João Silva",
+        "email": "joao.silva@email.com",
+        "ativo": True
+    }
+    
+    # Act
+    response = client.put("/api/usuarios/999", json=dados)
+    
+    # Assert
+    assert response.status_code == 404
+    assert "não encontrado" in response.json()["erro"].lower()
+
+
+def test_atualizar_usuario_email_duplicado(client):
+    """Deve retornar erro ao atualizar usuário com email duplicado."""
+    # Arrange
+    # Cria primeiro usuário
+    dados1 = {"nome": "João da Silva", "email": "joao@email.com", "senha": "senha123"}
+    client.post("/api/usuarios", json=dados1)
+    
+    # Cria segundo usuário
+    dados2 = {"nome": "Maria Silva", "email": "maria@email.com", "senha": "senha123"}
+    criado = client.post("/api/usuarios", json=dados2).json()
+    
+    # Tenta atualizar segundo usuário com email do primeiro
+    dados_atualizacao = {
+        "nome": "Maria Silva",
+        "email": "joao@email.com",  # Email já usado pelo primeiro usuário
+        "ativo": True
+    }
+    
+    # Act
+    response = client.put(f"/api/usuarios/{criado['id']}", json=dados_atualizacao)
+    
+    # Assert
+    assert response.status_code == 409
+    assert "já cadastrado" in response.json()["erro"].lower()
+
+
+def test_atualizar_usuario_parcial(client):
+    """Deve atualizar parcialmente um usuário."""
+    # Arrange
+    dados_criacao = {"nome": "João da Silva", "email": "joao@email.com", "senha": "senha123"}
+    criado = client.post("/api/usuarios", json=dados_criacao).json()
+    
+    dados_atualizacao = {
+        "nome": "João Silva"  # Atualiza apenas o nome
+    }
+    
+    # Act
+    response = client.put(f"/api/usuarios/{criado['id']}", json=dados_atualizacao)
+    
+    # Assert
+    assert response.status_code == 200
+    assert response.json()["nome"] == dados_atualizacao["nome"]
+    assert response.json()["email"] == dados_criacao["email"]  # Email não mudou
+    assert response.json()["ativo"] is True  # Status não mudou
+
+
+def test_atualizar_usuario_dados_invalidos(client):
+    """Deve retornar erro ao atualizar usuário com dados inválidos."""
+    # Arrange
+    dados_criacao = {"nome": "João da Silva", "email": "joao@email.com", "senha": "senha123"}
+    criado = client.post("/api/usuarios", json=dados_criacao).json()
+    
+    dados_invalidos = {
+        "nome": "",  # Nome vazio
+        "email": "email_invalido"  # Email inválido
+    }
+    
+    # Act
+    response = client.put(f"/api/usuarios/{criado['id']}", json=dados_invalidos)
+    
+    # Assert
+    assert response.status_code == 400
+    assert "erro" in response.json()

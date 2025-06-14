@@ -24,6 +24,16 @@ class CriarUsuarioDTO:
 
 
 @dataclass
+class AtualizarUsuarioDTO:
+    """DTO para atualização de usuário."""
+
+    id: str
+    nome: Optional[str] = None
+    email: Optional[str] = None
+    ativo: Optional[bool] = None
+
+
+@dataclass
 class UsuarioDTO:
     """DTO para retorno de usuário."""
 
@@ -152,3 +162,50 @@ class UserService:
             )
             for u in usuarios
         ]
+
+    def atualizar_usuario(self, dto: AtualizarUsuarioDTO) -> UsuarioDTO:
+        """
+        Atualiza um usuário existente.
+        
+        Args:
+            dto: Dados do usuário a ser atualizado
+            
+        Returns:
+            UsuarioDTO com os dados do usuário atualizado
+            
+        Raises:
+            ValueError: Se o usuário não existir ou se o email já estiver em uso
+        """
+        # Busca o usuário
+        usuario = self._repository.buscar_por_id(dto.id)
+        if not usuario:
+            raise ValueError("Usuário não encontrado")
+        
+        # Atualiza os campos fornecidos
+        if dto.nome is not None:
+            usuario.nome = dto.nome
+        
+        if dto.email is not None:
+            novo_email = Email(dto.email)
+            if str(novo_email) != str(usuario.email):
+                # Verifica se o novo email já está em uso
+                existente = self._repository.buscar_por_email(novo_email)
+                if existente and existente.id != usuario.id:
+                    raise ValueError("Email já cadastrado")
+                usuario.email = novo_email
+        
+        if dto.ativo is not None:
+            if dto.ativo:
+                usuario.ativar()
+            else:
+                usuario.desativar()
+        
+        # Persiste e retorna
+        atualizado = self._repository.atualizar(usuario)
+        return UsuarioDTO(
+            id=str(atualizado.id),
+            nome=atualizado.nome,
+            email=str(atualizado.email),
+            ativo=atualizado.ativo,
+            data_criacao=str(atualizado.data_criacao)
+        )

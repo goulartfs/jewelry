@@ -277,3 +277,56 @@ GET /api/usuarios?pagina=1&tamanho=10&nome=João&email=joao@email.com
       }
   ]
   ```
+
+### US4: Atualização de Usuário
+
+Endpoint para atualizar os dados de um usuário existente:
+
+```http
+PUT /api/usuarios/{id}
+```
+
+**Corpo da Requisição:**
+```json
+{
+    "nome": "João Silva",
+    "email": "joao.silva@email.com",
+    "ativo": true
+}
+```
+
+**Observações:**
+- Todos os campos são opcionais
+- Apenas os campos fornecidos serão atualizados
+- O email deve ser único no sistema
+- A senha não pode ser alterada por este endpoint
+
+**Respostas:**
+- `200 OK`: Usuário atualizado
+  ```json
+  {
+      "id": "123e4567-e89b-12d3-a456-426614174000",
+      "nome": "João Silva",
+      "email": "joao.silva@email.com",
+      "ativo": true,
+      "data_criacao": "2023-11-21T10:30:00Z"
+  }
+  ```
+- `404 Not Found`: Usuário não encontrado
+  ```json
+  {
+      "erro": "Usuário não encontrado"
+  }
+  ```
+- `409 Conflict`: Email já cadastrado
+  ```json
+  {
+      "erro": "Email já cadastrado"
+  }
+  ```
+- `400 Bad Request`: Dados inválidos
+  ```json
+  {
+      "erro": "Nome não pode ser vazio"
+  }
+  ```

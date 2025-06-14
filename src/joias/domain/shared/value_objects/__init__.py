@@ -1,0 +1,1 @@
+"""Pacote de objetos de valor compartilhados.\n\nEste pacote contém as classes base e implementações comuns\nde objetos de valor.\n"""\nfrom .value_object import ValueObject\nfrom .email import Email\n\n__all__ = ["ValueObject", "Email"]

@@ -22,27 +22,23 @@ wheels/
 
 # Virtual Environment
 venv/
-ENV/
 env/
-.env
+ENV/
 
-# IDE - VSCode
-.vscode/
-*.code-workspace
-.history/
-
-# IDE - PyCharm
+# IDE
 .idea/
-*.iml
-*.iws
-.idea_modules/
+.vscode/
+*.swp
+*.swo
+.project
+.pydevproject
+.settings/
 
-# Testes
-.pytest_cache/
+# Testing
 .coverage
 htmlcov/
+.pytest_cache/
 .tox/
-nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
@@ -50,15 +46,19 @@ coverage.xml
 # Logs
 *.log
 logs/
-log/
 
-# Sistema operacional
+# Environment variables
+.env
+.env.*
+
+# Database
+*.db
+*.sqlite3
+
+# Documentation
+docs/_build/
+site/
+
+# Misc
 .DS_Store
-Thumbs.db
-*.swp
-*.swo
-*~
-
-# Arquivos específicos do projeto
-config.local.py
-*.bak 
+Thumbs.db 

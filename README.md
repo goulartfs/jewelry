@@ -925,3 +925,32 @@ PUT /permissoes/{id}
       "detail": "Chave de permissão já cadastrada: SYSTEM_ACCESS_ALL"
   }
   ```
+
+### US15: Exclusão de Permissão
+
+Endpoint para excluir uma permissão do sistema.
+
+```http
+DELETE /permissoes/{id}
+```
+
+**Observações:**
+- A exclusão é permanente e não pode ser desfeita
+- Não é possível excluir uma permissão que está associada a perfis
+- É necessário remover a permissão de todos os perfis antes de excluí-la
+- Requer autenticação e permissões adequadas
+
+**Respostas:**
+- `204 No Content`: Permissão excluída com sucesso
+- `404 Not Found`: Permissão não encontrada
+  ```json
+  {
+      "detail": "Permissão não encontrada"
+  }
+  ```
+- `409 Conflict`: Permissão possui perfis associados
+  ```json
+  {
+      "detail": "Não é possível excluir uma permissão que está associada a perfis"
+  }
+  ```

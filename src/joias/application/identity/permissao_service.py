@@ -147,4 +147,26 @@ class PermissaoService:
                 descricao=p.descricao,
             )
             for p in permissoes
-        ] 
+        ]
+
+    def excluir_permissao(self, id: str) -> None:
+        """
+        Exclui uma permissão do sistema.
+
+        Args:
+            id: ID da permissão
+
+        Raises:
+            ValueError: Se a permissão não existir ou não puder ser excluída
+        """
+        # Busca a permissão
+        permissao = self._permissao_repository.buscar_por_id(id)
+        if not permissao:
+            raise ValueError("Permissão não encontrada")
+
+        # Verifica se a permissão está associada a algum perfil
+        if self._permissao_repository.tem_perfis_associados(permissao.id):
+            raise ValueError("Não é possível excluir uma permissão que está associada a perfis")
+
+        # Exclui a permissão
+        self._permissao_repository.excluir(permissao) 

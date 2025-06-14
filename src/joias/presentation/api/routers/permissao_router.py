@@ -122,4 +122,32 @@ def atualizar_permissao(
         service = PermissaoService(permissao_repository)
         return service.atualizar_permissao(id, dados)
     except ValueError as e:
-        raise HTTPException(status_code=404 if "não encontrada" in str(e) else 400, detail=str(e)) 
+        raise HTTPException(status_code=404 if "não encontrada" in str(e) else 400, detail=str(e))
+
+
+@router.delete(
+    "/{id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    description="Exclui uma permissão",
+)
+def excluir_permissao(
+    id: str,
+    permissao_repository: IPermissaoRepository = Depends(get_permissao_repository),
+) -> None:
+    """
+    Exclui uma permissão do sistema.
+
+    Args:
+        id: ID da permissão
+        permissao_repository: Repositório de permissões (injetado)
+
+    Raises:
+        HTTPException: Se a permissão não for encontrada ou não puder ser excluída
+    """
+    try:
+        service = PermissaoService(permissao_repository)
+        service.excluir_permissao(id)
+    except ValueError as e:
+        if "não encontrada" in str(e):
+            raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=409, detail=str(e)) 

@@ -1,14 +1,17 @@
 """
-Interface do repositório de Permissão.
+Interface para repositório de permissões.
 """
 from abc import ABC, abstractmethod
 from typing import List, Optional
+from uuid import UUID
 
 from ..entities.permissao import Permissao
 
 
 class IPermissaoRepository(ABC):
-    """Interface para o repositório de Permissão."""
+    """
+    Interface para repositório de permissões.
+    """
 
     @abstractmethod
     def criar(self, permissao: Permissao) -> Permissao:
@@ -19,7 +22,7 @@ class IPermissaoRepository(ABC):
             permissao: Permissão a ser criada
 
         Returns:
-            Permissão criada com ID
+            Permissão criada
         """
         pass
 
@@ -60,11 +63,37 @@ class IPermissaoRepository(ABC):
         pass
 
     @abstractmethod
-    def deletar(self, permissao: Permissao) -> None:
+    def atualizar(self, permissao: Permissao) -> Permissao:
         """
-        Remove uma permissão.
+        Atualiza uma permissão.
 
         Args:
-            permissao: Permissão a ser removida
+            permissao: Permissão a ser atualizada
+
+        Returns:
+            Permissão atualizada
+        """
+        pass
+
+    @abstractmethod
+    def excluir(self, permissao: Permissao) -> None:
+        """
+        Exclui uma permissão.
+
+        Args:
+            permissao: Permissão a ser excluída
+        """
+        pass
+
+    @abstractmethod
+    def tem_perfis_associados(self, id: UUID) -> bool:
+        """
+        Verifica se uma permissão está associada a algum perfil.
+
+        Args:
+            id: ID da permissão
+
+        Returns:
+            True se a permissão estiver associada a algum perfil, False caso contrário
         """
         pass 

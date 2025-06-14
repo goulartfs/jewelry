@@ -9,249 +9,257 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr
 
-from src.joias.application.identity.user_service import (
-    UserService,
-    CriarUsuarioDTO,
-    AtualizarUsuarioDTO,
-    UsuarioDTO
+from ....application.identity.usuario_service import UsuarioService
+from ....application.shared.exceptions import (
+    EntidadeJaExisteError,
+    EntidadeNaoEncontradaError,
+    ValidacaoError,
 )
-from src.joias.infrastructure.persistence.sqlalchemy.repositories.usuario_repository import (
-    SQLUsuarioRepository,
-)
-from src.joias.presentation.api.dependencies import get_db_session
+from ....domain.entities.usuario import Usuario
+from ..dependencies import get_current_user, get_usuario_service
 
 
-class CriarUsuarioRequest(BaseModel):
-    """Modelo de requisição para criar usuário."""
+class UsuarioBase(BaseModel):
+    """
+    Modelo base para usuário.
+    """
+
     nome: str
     email: EmailStr
+
+
+class UsuarioCreate(UsuarioBase):
+    """
+    Modelo para criação de usuário.
+    """
+
     senha: str
 
 
-class AtualizarUsuarioRequest(BaseModel):
-    """Modelo de requisição para atualizar usuário."""
+class UsuarioUpdate(BaseModel):
+    """
+    Modelo para atualização de usuário.
+    """
+
     nome: Optional[str] = None
     email: Optional[EmailStr] = None
+    senha: Optional[str] = None
     ativo: Optional[bool] = None
 
 
-class UsuarioResponse(BaseModel):
-    """Modelo de resposta com dados do usuário."""
+class UsuarioResponse(UsuarioBase):
+    """
+    Modelo para resposta de usuário.
+    """
+
     id: str
-    nome: str
-    email: str
     ativo: bool
     data_criacao: str
 
+    class Config:
+        """
+        Configuração do modelo.
+        """
 
-class ErrorResponse(BaseModel):
-    """Modelo de resposta de erro."""
-    erro: str
+        from_attributes = True
 
 
-router = APIRouter(prefix="/api/usuarios", tags=["Usuários"])
+router = APIRouter(
+    prefix="/usuarios",
+    tags=["Usuários"],
+)
+
+
+def _usuario_to_response(usuario: Usuario) -> UsuarioResponse:
+    """
+    Converte um usuário para o modelo de resposta.
+
+    Args:
+        usuario: Usuário a ser convertido
+
+    Returns:
+        Modelo de resposta do usuário
+    """
+    return UsuarioResponse(
+        id=str(usuario.id),
+        nome=usuario.nome,
+        email=str(usuario.email),
+        ativo=usuario.ativo,
+        data_criacao=usuario.data_criacao.isoformat(),
+    )
 
 
 @router.post(
     "",
     response_model=UsuarioResponse,
     status_code=status.HTTP_201_CREATED,
-    responses={
-        409: {"model": ErrorResponse, "description": "Email já cadastrado"},
-        400: {"model": ErrorResponse, "description": "Dados inválidos"}
-    }
 )
-def criar_usuario(request: CriarUsuarioRequest, session=Depends(get_db_session)):
+async def criar_usuario(
+    usuario: UsuarioCreate,
+    usuario_service: UsuarioService = Depends(get_usuario_service),
+) -> UsuarioResponse:
     """
     Cria um novo usuário.
-    
+
     Args:
-        request: Dados do usuário a ser criado
-        session: Sessão do banco de dados
-        
+        usuario: Dados do usuário
+        usuario_service: Serviço de usuário
+
     Returns:
-        Dados do usuário criado
-        
+        Usuário criado
+
     Raises:
-        HTTPException: Se houver erro de validação ou conflito
+        HTTPException: Se houver erro na criação do usuário
     """
     try:
-        service = UserService(SQLUsuarioRepository(session))
-        dto = CriarUsuarioDTO(
-            nome=request.nome,
-            email=request.email,
-            senha=request.senha
+        usuario_criado = usuario_service.criar_usuario(
+            nome=usuario.nome,
+            email=usuario.email,
+            senha=usuario.senha,
         )
-        usuario = service.criar_usuario(dto)
-        return usuario
-    except ValueError as e:
-        if "já cadastrado" in str(e).lower():
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail={"erro": str(e)}
-            )
+        return _usuario_to_response(usuario_criado)
+    except EntidadeJaExisteError as e:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(e),
+        )
+    except ValidacaoError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"erro": str(e)}
+            detail=str(e),
         )
 
 
 @router.get(
     "/{id}",
     response_model=UsuarioResponse,
-    responses={
-        404: {"model": ErrorResponse, "description": "Usuário não encontrado"}
-    }
 )
-def buscar_usuario(id: str, session=Depends(get_db_session)):
+async def buscar_usuario_por_id(
+    id: str,
+    usuario_service: UsuarioService = Depends(get_usuario_service),
+    current_user: Usuario = Depends(get_current_user),
+) -> UsuarioResponse:
     """
     Busca um usuário pelo ID.
-    
+
     Args:
         id: ID do usuário
-        session: Sessão do banco de dados
-        
+        usuario_service: Serviço de usuário
+        current_user: Usuário autenticado
+
     Returns:
-        Dados do usuário
-        
+        Usuário encontrado
+
     Raises:
         HTTPException: Se o usuário não for encontrado
     """
-    service = UserService(SQLUsuarioRepository(session))
-    usuario = service.buscar_usuario(id)
-    if not usuario:
+    try:
+        usuario = usuario_service.buscar_usuario_por_id(id)
+        return _usuario_to_response(usuario)
+    except EntidadeNaoEncontradaError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail={"erro": "Usuário não encontrado"}
+            detail=str(e),
         )
-    return usuario
 
 
 @router.get(
     "",
-    response_model=List[UsuarioResponse]
+    response_model=List[UsuarioResponse],
 )
-def listar_usuarios(
-    pagina: int = 1,
-    tamanho: int = 10,
-    email: Optional[str] = None,
-    nome: Optional[str] = None,
-    session=Depends(get_db_session)
-):
+async def listar_usuarios(
+    usuario_service: UsuarioService = Depends(get_usuario_service),
+    current_user: Usuario = Depends(get_current_user),
+) -> List[UsuarioResponse]:
     """
-    Lista usuários com paginação e filtros.
-    
+    Lista todos os usuários.
+
     Args:
-        pagina: Número da página
-        tamanho: Quantidade de itens por página
-        email: Filtro por email
-        nome: Filtro por nome
-        session: Sessão do banco de dados
-        
+        usuario_service: Serviço de usuário
+        current_user: Usuário autenticado
+
     Returns:
         Lista de usuários
     """
-    service = UserService(SQLUsuarioRepository(session))
-    return service.listar_usuarios(
-        pagina=pagina,
-        tamanho=tamanho,
-        email=email,
-        nome=nome
-    )
+    usuarios = usuario_service.listar_usuarios()
+    return [_usuario_to_response(usuario) for usuario in usuarios]
 
 
 @router.put(
     "/{id}",
     response_model=UsuarioResponse,
-    responses={
-        404: {"model": ErrorResponse, "description": "Usuário não encontrado"},
-        409: {"model": ErrorResponse, "description": "Email já cadastrado"},
-        400: {"model": ErrorResponse, "description": "Dados inválidos"}
-    }
 )
-def atualizar_usuario(
+async def atualizar_usuario(
     id: str,
-    request: AtualizarUsuarioRequest,
-    session=Depends(get_db_session)
-):
+    usuario: UsuarioUpdate,
+    usuario_service: UsuarioService = Depends(get_usuario_service),
+    current_user: Usuario = Depends(get_current_user),
+) -> UsuarioResponse:
     """
-    Atualiza um usuário existente.
-    
+    Atualiza um usuário.
+
     Args:
         id: ID do usuário
-        request: Dados do usuário a ser atualizado
-        session: Sessão do banco de dados
-        
+        usuario: Dados do usuário
+        usuario_service: Serviço de usuário
+        current_user: Usuário autenticado
+
     Returns:
-        Dados do usuário atualizado
-        
+        Usuário atualizado
+
     Raises:
-        HTTPException: Se houver erro de validação ou conflito
+        HTTPException: Se houver erro na atualização do usuário
     """
     try:
-        service = UserService(SQLUsuarioRepository(session))
-        dto = AtualizarUsuarioDTO(
+        usuario_atualizado = usuario_service.atualizar_usuario(
             id=id,
-            nome=request.nome,
-            email=request.email,
-            ativo=request.ativo
+            nome=usuario.nome,
+            email=usuario.email,
+            senha=usuario.senha,
+            ativo=usuario.ativo,
         )
-        usuario = service.atualizar_usuario(dto)
-        return usuario
-    except ValueError as e:
-        if "não encontrado" in str(e).lower():
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail={"erro": str(e)}
-            )
-        if "já cadastrado" in str(e).lower():
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail={"erro": str(e)}
-            )
+        return _usuario_to_response(usuario_atualizado)
+    except EntidadeNaoEncontradaError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )
+    except EntidadeJaExisteError as e:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(e),
+        )
+    except ValidacaoError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"erro": str(e)}
+            detail=str(e),
         )
 
 
 @router.delete(
     "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    responses={
-        404: {"model": ErrorResponse, "description": "Usuário não encontrado"},
-        409: {"model": ErrorResponse, "description": "Usuário possui dependências"}
-    }
 )
-def excluir_usuario(id: str, session=Depends(get_db_session)):
+async def excluir_usuario(
+    id: str,
+    usuario_service: UsuarioService = Depends(get_usuario_service),
+    current_user: Usuario = Depends(get_current_user),
+) -> None:
     """
-    Exclui um usuário existente.
-    
+    Exclui um usuário.
+
     Args:
         id: ID do usuário
-        session: Sessão do banco de dados
-        
-    Returns:
-        Nada (204 No Content)
-        
+        usuario_service: Serviço de usuário
+        current_user: Usuário autenticado
+
     Raises:
-        HTTPException: Se o usuário não existir ou possuir dependências
+        HTTPException: Se o usuário não for encontrado
     """
     try:
-        service = UserService(SQLUsuarioRepository(session))
-        service.excluir_usuario(id)
-    except ValueError as e:
-        if "não encontrado" in str(e).lower():
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail={"erro": str(e)}
-            )
-        if "possui pedidos" in str(e).lower():
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail={"erro": str(e)}
-            )
+        usuario_service.excluir_usuario(id)
+    except EntidadeNaoEncontradaError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"erro": str(e)}
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
         ) 

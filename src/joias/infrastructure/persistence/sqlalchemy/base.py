@@ -1,13 +1,26 @@
 """
-Classe base do SQLAlchemy.
-
-Este módulo define a classe base para os modelos
-SQLAlchemy.
+Configuração do SQLAlchemy.
 """
-from sqlalchemy.orm import DeclarativeBase
+import os
 
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-class Base(DeclarativeBase):
-    """Classe base para os modelos SQLAlchemy."""
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "sqlite:///./joias.db",
+)
 
-    pass
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={"check_same_thread": False},
+)
+
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine,
+)
+
+Base = declarative_base()

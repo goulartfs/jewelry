@@ -1,38 +1,21 @@
 """
-Gerenciamento de sessões do SQLAlchemy.
-
-Este módulo define as funções para gerenciar as sessões
-do SQLAlchemy.
+Configuração da sessão do SQLAlchemy.
 """
 from typing import Generator
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
 
-from src.joias.infrastructure.config import get_settings
+from .base import SessionLocal
 
 
-def get_engine():
+def get_db_session() -> Generator[Session, None, None]:
     """
-    Cria e retorna o engine do SQLAlchemy.
-    
-    Returns:
-        Engine do SQLAlchemy
-    """
-    settings = get_settings()
-    return create_engine(settings.database_url)
+    Retorna uma sessão do SQLAlchemy.
 
-
-def get_session() -> Generator[Session, None, None]:
-    """
-    Cria e retorna uma sessão do SQLAlchemy.
-    
     Yields:
         Sessão do SQLAlchemy
     """
-    engine = get_engine()
-    session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    session = session_factory()
+    session = SessionLocal()
     try:
         yield session
     finally:

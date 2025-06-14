@@ -1,73 +1,129 @@
 """
-Entidade de usuário.
-
-Este módulo contém a entidade de usuário e suas classes relacionadas.
+Entidade de usuário do sistema.
 """
-from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
+from uuid import UUID, uuid4
 
-from .autorizacao import Perfil
-from .base import Entity
-from .dados_pessoais import DadoPessoal
-from .empresa import Empresa
+from ..shared.aggregate_root import AggregateRoot
+from ..shared.value_objects import Email
 
 
-@dataclass
-class Usuario(Entity):
+class Usuario(AggregateRoot):
     """
     Entidade que representa um usuário do sistema.
-
-    Um usuário é uma pessoa que interage com o sistema e pode
-    ter diferentes níveis de acesso baseados em seu perfil.
     """
 
-    username: str
-    email: str
-    senha_hash: str
-    perfil: Perfil
-    dados_pessoais: DadoPessoal
-    empresa: Optional[Empresa] = None
-    data_ultimo_acesso: Optional[datetime] = None
-
-    def atualizar_ultimo_acesso(self) -> None:
-        """Atualiza a data do último acesso do usuário."""
-        self.data_ultimo_acesso = datetime.now()
-        self.atualizar()
-
-    def alterar_senha(self, nova_senha_hash: str) -> None:
+    def __init__(
+        self,
+        nome: str,
+        email: Email,
+        senha_hash: str,
+        ativo: bool = True,
+        id: Optional[UUID] = None,
+        data_criacao: Optional[datetime] = None,
+    ):
         """
-        Altera a senha do usuário.
+        Inicializa um novo usuário.
 
         Args:
-            nova_senha_hash: Nova senha já hasheada
+            nome: Nome do usuário
+            email: Email do usuário
+            senha_hash: Hash da senha do usuário
+            ativo: Se o usuário está ativo
+            id: ID do usuário (opcional, gerado automaticamente se não fornecido)
+            data_criacao: Data de criação do usuário (opcional, gerada automaticamente se não fornecida)
         """
-        self.senha_hash = nova_senha_hash
-        self.atualizar()
+        super().__init__(id or uuid4())
+        self.nome = nome
+        self.email = email
+        self.senha_hash = senha_hash
+        self.ativo = ativo
+        self.data_criacao = data_criacao or datetime.utcnow()
 
-    def vincular_empresa(self, empresa: Empresa) -> None:
+    @property
+    def nome(self) -> str:
+        """Nome do usuário."""
+        return self._nome
+
+    @nome.setter
+    def nome(self, value: str) -> None:
         """
-        Vincula uma empresa ao usuário.
+        Define o nome do usuário.
 
         Args:
-            empresa: Empresa a ser vinculada
-        """
-        self.empresa = empresa
-        self.atualizar()
+            value: Nome do usuário
 
-    def desvincular_empresa(self) -> None:
-        """Remove o vínculo com a empresa atual."""
-        self.empresa = None
-        self.atualizar()
-
-    def tem_permissao(self, codigo_permissao: str) -> bool:
+        Raises:
+            ValueError: Se o nome for vazio ou muito longo
         """
-        Verifica se o usuário tem uma determinada permissão.
+        if not value:
+            raise ValueError("Nome não pode ser vazio")
+        if len(value) > 100:
+            raise ValueError("Nome não pode ter mais de 100 caracteres")
+        self._nome = value
+
+    @property
+    def email(self) -> Email:
+        """Email do usuário."""
+        return self._email
+
+    @email.setter
+    def email(self, value: Email) -> None:
+        """
+        Define o email do usuário.
 
         Args:
-            codigo_permissao: Código da permissão a ser verificada
-
-        Returns:
-            True se o usuário tem a permissão, False caso contrário
+            value: Email do usuário
         """
-        return any(p.codigo == codigo_permissao for p in self.perfil.permissoes)
+        self._email = value
+
+    @property
+    def senha_hash(self) -> str:
+        """Hash da senha do usuário."""
+        return self._senha_hash
+
+    @senha_hash.setter
+    def senha_hash(self, value: str) -> None:
+        """
+        Define o hash da senha do usuário.
+
+        Args:
+            value: Hash da senha
+
+        Raises:
+            ValueError: Se o hash da senha for vazio
+        """
+        if not value:
+            raise ValueError("Hash da senha não pode ser vazio")
+        self._senha_hash = value
+
+    @property
+    def ativo(self) -> bool:
+        """Se o usuário está ativo."""
+        return self._ativo
+
+    @ativo.setter
+    def ativo(self, value: bool) -> None:
+        """
+        Define se o usuário está ativo.
+
+        Args:
+            value: Se o usuário está ativo
+        """
+        self._ativo = value
+
+    @property
+    def data_criacao(self) -> datetime:
+        """Data de criação do usuário."""
+        return self._data_criacao
+
+    @data_criacao.setter
+    def data_criacao(self, value: datetime) -> None:
+        """
+        Define a data de criação do usuário.
+
+        Args:
+            value: Data de criação
+        """
+        self._data_criacao = value

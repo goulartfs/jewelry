@@ -17,105 +17,148 @@ from ...domain.shared.value_objects.email import Email
 from ...infrastructure.persistence.sqlalchemy.repositories.usuario_repository import (
     UsuarioRepository,
 )
+from ...domain.repositories.usuario_repository import IUsuarioRepository
+from ..shared.exceptions import AutenticacaoError, ValidacaoError
+
+import bcrypt
+from jwt.exceptions import InvalidTokenError
 
 
 class AuthService:
     """
-    Serviço de autenticação.
-
-    Esta classe implementa a lógica de autenticação, incluindo:
-    - Autenticação de usuários
-    - Geração de tokens JWT
-    - Validação de tokens
-    - Gerenciamento de senhas
+    Serviço para autenticação de usuários.
     """
 
-    def __init__(self, db: Session):
+    def __init__(
+        self,
+        usuario_repository: IUsuarioRepository,
+        secret_key: str,
+        token_expiration: int = 24,
+    ):
         """
         Inicializa o serviço de autenticação.
 
         Args:
-            db: Sessão do banco de dados
+            usuario_repository: Repositório de usuários
+            secret_key: Chave secreta para geração de tokens
+            token_expiration: Tempo de expiração do token em horas (padrão: 24)
         """
-        self.db = db
-        self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-        self.secret_key = os.getenv("SECRET_KEY", "your-secret-key")
-        self.algorithm = "HS256"
-        self.usuario_repository = UsuarioRepository(db)
+        self._usuario_repository = usuario_repository
+        self._secret_key = secret_key
+        self._token_expiration = token_expiration
 
-    def verify_password(self, plain_password: str, hashed_password: str) -> bool:
-        """
-        Verifica se uma senha está correta.
-
-        Args:
-            plain_password: Senha em texto plano
-            hashed_password: Hash da senha
-
-        Returns:
-            bool: True se a senha estiver correta
-        """
-        return self.pwd_context.verify(plain_password, hashed_password)
-
-    def get_password_hash(self, password: str) -> str:
-        """
-        Gera o hash de uma senha.
-
-        Args:
-            password: Senha em texto plano
-
-        Returns:
-            str: Hash da senha
-        """
-        return self.pwd_context.hash(password)
-
-    def authenticate(self, email: Email, password: str) -> Optional[Usuario]:
+    def autenticar(self, email: str, senha: str) -> str:
         """
         Autentica um usuário.
 
         Args:
             email: Email do usuário
-            password: Senha em texto plano
+            senha: Senha do usuário
 
         Returns:
-            Optional[Usuario]: Usuário autenticado ou None
-        """
-        user = self.usuario_repository.buscar_por_email(email)
-        if not user:
-            return None
-        if not self.verify_password(password, user.senha_hash):
-            return None
-        return user
+            Token JWT
 
-    def create_access_token(
-        self, data: Dict[str, Any], expires_delta: Optional[timedelta] = None
-    ) -> str:
+        Raises:
+            AutenticacaoError: Se as credenciais forem inválidas
+            ValidacaoError: Se o email for inválido
         """
-        Cria um token de acesso JWT.
+        try:
+            email_obj = Email(email)
+        except ValueError as e:
+            raise ValidacaoError(str(e))
+
+        usuario = self._usuario_repository.buscar_por_email(email_obj)
+        if not usuario:
+            raise AutenticacaoError("Credenciais inválidas")
+
+        if not usuario.ativo:
+            raise AutenticacaoError("Usuário inativo")
+
+        if not self._verificar_senha(senha, usuario.senha_hash):
+            raise AutenticacaoError("Credenciais inválidas")
+
+        return self._gerar_token(usuario)
+
+    def validar_token(self, token: str) -> Usuario:
+        """
+        Valida um token JWT.
 
         Args:
-            data: Dados a serem incluídos no token
-            expires_delta: Tempo de expiração do token
+            token: Token JWT
 
         Returns:
-            str: Token JWT
-        """
-        to_encode = data.copy()
-        if expires_delta:
-            expire = datetime.utcnow() + expires_delta
-        else:
-            expire = datetime.utcnow() + timedelta(minutes=15)
-        to_encode.update({"exp": expire})
-        encoded_jwt = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
-        return encoded_jwt
+            Usuário autenticado
 
-    def get_user(self, user_id: str) -> Optional[Usuario]:
+        Raises:
+            AutenticacaoError: Se o token for inválido
         """
-        Busca um usuário pelo ID.
+        try:
+            payload = jwt.decode(
+                token,
+                self._secret_key,
+                algorithms=["HS256"],
+            )
+        except InvalidTokenError:
+            raise AutenticacaoError("Token inválido")
+
+        usuario = self._usuario_repository.buscar_por_id(payload["sub"])
+        if not usuario:
+            raise AutenticacaoError("Token inválido")
+
+        if not usuario.ativo:
+            raise AutenticacaoError("Usuário inativo")
+
+        return usuario
+
+    def _gerar_token(self, usuario: Usuario) -> str:
+        """
+        Gera um token JWT.
 
         Args:
-            user_id: ID do usuário
+            usuario: Usuário
 
         Returns:
-            Optional[Usuario]: Usuário encontrado ou None
+            Token JWT
         """
-        return self.usuario_repository.buscar_por_id(user_id)
+        payload = {
+            "sub": str(usuario.id),
+            "email": str(usuario.email),
+            "exp": datetime.utcnow() + timedelta(hours=self._token_expiration),
+        }
+        return jwt.encode(
+            payload,
+            self._secret_key,
+            algorithm="HS256",
+        )
+
+    def _verificar_senha(self, senha: str, senha_hash: str) -> bool:
+        """
+        Verifica se a senha está correta.
+
+        Args:
+            senha: Senha em texto plano
+            senha_hash: Hash da senha
+
+        Returns:
+            True se a senha estiver correta, False caso contrário
+        """
+        return bcrypt.checkpw(
+            senha.encode("utf-8"),
+            senha_hash.encode("utf-8"),
+        )
+
+    def gerar_hash_senha(self, senha: str) -> str:
+        """
+        Gera o hash de uma senha.
+
+        Args:
+            senha: Senha em texto plano
+
+        Returns:
+            Hash da senha
+        """
+        salt = bcrypt.gensalt()
+        return bcrypt.hashpw(
+            senha.encode("utf-8"),
+            salt,
+        ).decode("utf-8")

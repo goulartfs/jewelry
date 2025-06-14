@@ -2,31 +2,117 @@
 
 Sistema para gestão de joias, incluindo catálogo de produtos, fornecedores, pedidos e clientes.
 
+## Visão Geral do Negócio
+
+### Empacotamento de Joias
+
+O sistema gerencia o empacotamento eficiente de joias em caixas, seguindo regras específicas:
+
+1. **Regras de Empacotamento**:
+   - Cada joia tem um valor específico ($)
+   - Cada caixa tem um limite de peso (gramas)
+   - O objetivo é maximizar o valor total em cada caixa
+   - Joias mais valiosas têm prioridade no empacotamento
+
+2. **Processo de Empacotamento**:
+   ```
+   Entrada: [peso valor]
+   50 100    # Joia de 50g valendo $100
+   30 45     # Joia de 30g valendo $45
+   20 30     # Joia de 20g valendo $30
+   
+   Limite da Caixa: 80g
+   
+   Saída: [índice]
+   1,3    # Joias #1 e #3 totalizam 70g e $130
+   2      # Joia #2 sozinha (30g, $45)
+   ```
+
+3. **Benefícios**:
+   - Otimização do espaço de transporte
+   - Maximização do valor por remessa
+   - Redução de custos logísticos
+   - Rastreabilidade das joias
+
 ## Arquitetura
 
 O projeto segue os princípios do Domain-Driven Design (DDD) e Clean Architecture, organizando o código em camadas:
 
-- **Domain**: Contém as regras de negócio e entidades do domínio
-  - `shared`: Classes e interfaces base compartilhadas
-  - `identity`: Gerenciamento de identidade e acesso
-  - `organization`: Gestão da organização e seus membros
-  - `catalog`: Catálogo de produtos e fornecedores
-  - `order`: Pedidos e transações
+### Domain Layer
 
-- **Application**: Implementa os casos de uso da aplicação
-  - Orquestra entidades do domínio
-  - Implementa regras de aplicação
-  - Define interfaces para infraestrutura
+Contém as regras de negócio e entidades do domínio:
 
-- **Infrastructure**: Implementações concretas
-  - Persistência (SQLAlchemy)
-  - Mensageria
-  - Segurança
-  - Logging
+- **shared/**: Classes e interfaces base compartilhadas
+  - `AggregateRoot`: Base para agregados do domínio
+  - `DomainEvent`: Base para eventos do domínio
+  - `ValueObject`: Base para objetos de valor
+  - `Email`: Implementação de e-mail como objeto de valor
 
-- **Presentation**: Interfaces com usuário
-  - API REST (FastAPI)
-  - CLI
+- **identity/**: Gerenciamento de identidade e acesso
+  - Autenticação e autorização
+  - Perfis de usuário
+  - Controle de acesso
+
+- **catalog/**: Catálogo de produtos e fornecedores
+  - Gestão de joias
+  - Cadastro de fornecedores
+  - Precificação
+  - Categorização
+
+- **order/**: Pedidos e transações
+  - Processamento de pedidos
+  - Empacotamento de joias
+  - Rastreamento de envios
+  - Faturamento
+
+### Application Layer
+
+Implementa os casos de uso da aplicação:
+
+- Orquestra entidades do domínio
+- Implementa regras de aplicação
+- Define interfaces para infraestrutura
+- Gerencia transações
+- Coordena eventos do domínio
+
+### Infrastructure Layer
+
+Implementações concretas:
+
+- **Persistência**:
+  - SQLAlchemy para ORM
+  - Migrations com Alembic
+  - Repositórios concretos
+
+- **Mensageria**:
+  - Eventos assíncronos
+  - Filas de processamento
+  - Notificações
+
+- **Segurança**:
+  - Autenticação JWT
+  - Criptografia
+  - Auditoria
+
+- **Logging**:
+  - Rastreamento de operações
+  - Monitoramento
+  - Diagnóstico
+
+### Presentation Layer
+
+Interfaces com usuário:
+
+- **API REST** (FastAPI):
+  - Documentação OpenAPI
+  - Validação de entrada
+  - Serialização de dados
+  - Tratamento de erros
+
+- **CLI**:
+  - Operações em lote
+  - Scripts de manutenção
+  - Ferramentas de diagnóstico
 
 ## Instalação
 
@@ -97,6 +183,42 @@ uvicorn src.joias.presentation.api.main:app --reload
 ```
 http://localhost:8000/docs
 ```
+
+## Docker
+
+O projeto inclui configuração para Docker:
+
+1. Construa a imagem:
+```bash
+docker build -t joias .
+```
+
+2. Execute o container:
+```bash
+docker-compose up -d
+```
+
+## Estrutura do Projeto
+
+```
+src/joias/
+├── application/        # Casos de uso e serviços
+├── domain/            # Regras e entidades de negócio
+│   ├── shared/        # Componentes compartilhados
+│   ├── identity/      # Gestão de identidade
+│   ├── catalog/       # Catálogo de produtos
+│   └── order/         # Gestão de pedidos
+├── infrastructure/    # Implementações técnicas
+└── presentation/      # Interfaces de usuário
+```
+
+## Contribuindo
+
+1. Faça um fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
+3. Faça commit das alterações (`git commit -am 'Adiciona nova feature'`)
+4. Faça push para a branch (`git push origin feature/nova-feature`)
+5. Crie um Pull Request
 
 ## Licença
 

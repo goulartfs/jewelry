@@ -358,3 +358,135 @@ DELETE /api/usuarios/{id}
       "erro": "Usuário possui pedidos ativos"
   }
   ```
+
+### US6: Autenticação e Autorização
+
+O sistema implementa um mecanismo robusto de autenticação e autorização baseado em perfis de usuário.
+
+#### Endpoints de Autenticação
+
+1. **Login**
+```http
+POST /api/auth/login
+```
+
+**Requisição:**
+```json
+{
+    "email": "usuario@email.com",
+    "senha": "senha123"
+}
+```
+
+**Respostas:**
+- `200 OK`: Login bem-sucedido
+  ```json
+  {
+      "access_token": "eyJhbGciOiJIUzI1NiIs...",
+      "token_type": "bearer",
+      "expires_in": 3600
+  }
+  ```
+- `401 Unauthorized`: Credenciais inválidas
+  ```json
+  {
+      "erro": "Email ou senha inválidos"
+  }
+  ```
+
+#### Endpoints de Perfil
+
+1. **Criar Perfil**
+```http
+POST /api/perfis
+```
+
+**Requisição:**
+```json
+{
+    "nome": "Administrador",
+    "descricao": "Acesso total ao sistema",
+    "permissoes": ["criar_usuario", "editar_usuario", "excluir_usuario"]
+}
+```
+
+**Respostas:**
+- `201 Created`: Perfil criado
+  ```json
+  {
+      "id": "123e4567-e89b-12d3-a456-426614174000",
+      "nome": "Administrador",
+      "descricao": "Acesso total ao sistema",
+      "permissoes": ["criar_usuario", "editar_usuario", "excluir_usuario"],
+      "data_criacao": "2024-03-19T14:30:00Z"
+  }
+  ```
+
+2. **Listar Perfis**
+```http
+GET /api/perfis
+```
+
+**Respostas:**
+- `200 OK`: Lista de perfis
+  ```json
+  {
+      "perfis": [
+          {
+              "id": "123e4567-e89b-12d3-a456-426614174000",
+              "nome": "Administrador",
+              "descricao": "Acesso total ao sistema",
+              "permissoes": ["criar_usuario", "editar_usuario", "excluir_usuario"]
+          },
+          {
+              "id": "987fcdeb-a654-3210-9876-543210987654",
+              "nome": "Vendedor",
+              "descricao": "Acesso às funcionalidades de vendas",
+              "permissoes": ["visualizar_catalogo", "criar_pedido"]
+          }
+      ]
+  }
+  ```
+
+3. **Atribuir Perfil a Usuário**
+```http
+POST /api/usuarios/{usuario_id}/perfis
+```
+
+**Requisição:**
+```json
+{
+    "perfil_id": "123e4567-e89b-12d3-a456-426614174000"
+}
+```
+
+**Respostas:**
+- `200 OK`: Perfil atribuído com sucesso
+  ```json
+  {
+      "mensagem": "Perfil atribuído com sucesso"
+  }
+  ```
+- `404 Not Found`: Usuário ou perfil não encontrado
+  ```json
+  {
+      "erro": "Usuário ou perfil não encontrado"
+  }
+  ```
+
+#### Autorização em Endpoints
+
+Todos os endpoints protegidos devem incluir o token JWT no header:
+
+```http
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+O sistema verifica automaticamente:
+1. Validade do token
+2. Permissões do usuário
+3. Escopo do acesso
+
+Em caso de acesso não autorizado:
+- `401 Unauthorized`: Token inválido ou expirado
+- `403 Forbidden`: Usuário sem permissão necessária

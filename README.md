@@ -635,3 +635,44 @@ DELETE /perfis/{perfil_id}/permissoes/{permissao_id}
 3. Um perfil pode ter múltiplas permissões
 4. Uma permissão pode estar associada a múltiplos perfis
 5. A remoção de uma permissão de um perfil não exclui a permissão do sistema
+
+### US8: Visualização de Perfil
+
+Endpoint para consultar os detalhes de um perfil específico.
+
+```http
+GET /perfis/{id}
+```
+
+**Respostas:**
+- `200 OK`: Perfil encontrado
+  ```json
+  {
+      "id": "323e4567-e89b-12d3-a456-426614174000",
+      "nome": "Administrador",
+      "descricao": "Perfil com acesso total",
+      "data_criacao": "2024-01-20T10:30:00Z",
+      "permissoes": [
+          {
+              "id": "123e4567-e89b-12d3-a456-426614174000",
+              "nome": "Acesso Total",
+              "chave": "ACCESS_ALL",
+              "descricao": "Permite acesso total ao sistema"
+          }
+      ]
+  }
+  ```
+- `404 Not Found`: Perfil não encontrado
+  ```json
+  {
+      "detail": "Perfil não encontrado"
+  }
+  ```
+
+#### Observações
+
+1. O endpoint retorna todos os detalhes do perfil, incluindo suas permissões associadas
+2. A resposta inclui a data de criação do perfil
+3. As permissões são retornadas com todos os seus detalhes (id, nome, chave e descrição)
+4. O acesso a este endpoint requer autenticação
+5. A remoção de uma permissão de um perfil não exclui a permissão do sistema

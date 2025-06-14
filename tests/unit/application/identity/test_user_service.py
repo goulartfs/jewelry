@@ -237,3 +237,43 @@ def test_atualizar_usuario_parcial(repository_mock, usuario_mock):
     assert resultado.email == str(usuario_mock.email)
     assert resultado.ativo == usuario_mock.ativo
     repository_mock.atualizar.assert_called_once()
+
+
+def test_excluir_usuario(repository_mock, usuario_mock):
+    """Deve excluir um usuário com sucesso."""
+    # Arrange
+    service = UserService(repository_mock)
+    repository_mock.buscar_por_id.return_value = usuario_mock
+    
+    # Act
+    service.excluir_usuario(str(usuario_mock.id))
+    
+    # Assert
+    repository_mock.excluir.assert_called_once_with(str(usuario_mock.id))
+
+
+def test_excluir_usuario_inexistente(repository_mock):
+    """Deve lançar erro ao excluir usuário inexistente."""
+    # Arrange
+    service = UserService(repository_mock)
+    repository_mock.buscar_por_id.return_value = None
+    
+    # Act & Assert
+    with pytest.raises(ValueError) as exc:
+        service.excluir_usuario("123")
+    assert "não encontrado" in str(exc.value).lower()
+    repository_mock.excluir.assert_not_called()
+
+
+def test_excluir_usuario_com_dependencias(repository_mock, usuario_mock):
+    """Deve lançar erro ao excluir usuário com dependências."""
+    # Arrange
+    service = UserService(repository_mock)
+    repository_mock.buscar_por_id.return_value = usuario_mock
+    repository_mock.excluir.side_effect = ValueError("Usuário possui pedidos ativos")
+    
+    # Act & Assert
+    with pytest.raises(ValueError) as exc:
+        service.excluir_usuario(str(usuario_mock.id))
+    assert "possui pedidos" in str(exc.value).lower()
+    repository_mock.excluir.assert_called_once_with(str(usuario_mock.id))

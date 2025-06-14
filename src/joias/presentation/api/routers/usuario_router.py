@@ -212,4 +212,46 @@ def atualizar_usuario(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"erro": str(e)}
+        )
+
+
+@router.delete(
+    "/{id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        404: {"model": ErrorResponse, "description": "Usuário não encontrado"},
+        409: {"model": ErrorResponse, "description": "Usuário possui dependências"}
+    }
+)
+def excluir_usuario(id: str, session=Depends(get_db_session)):
+    """
+    Exclui um usuário existente.
+    
+    Args:
+        id: ID do usuário
+        session: Sessão do banco de dados
+        
+    Returns:
+        Nada (204 No Content)
+        
+    Raises:
+        HTTPException: Se o usuário não existir ou possuir dependências
+    """
+    try:
+        service = UserService(SQLUsuarioRepository(session))
+        service.excluir_usuario(id)
+    except ValueError as e:
+        if "não encontrado" in str(e).lower():
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={"erro": str(e)}
+            )
+        if "possui pedidos" in str(e).lower():
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={"erro": str(e)}
+            )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"erro": str(e)}
         ) 

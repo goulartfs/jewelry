@@ -209,3 +209,25 @@ class UserService:
             ativo=atualizado.ativo,
             data_criacao=str(atualizado.data_criacao)
         )
+
+    def excluir_usuario(self, id: str) -> None:
+        """
+        Exclui um usuário existente.
+        
+        Args:
+            id: ID do usuário
+            
+        Raises:
+            ValueError: Se o usuário não existir ou se houver dependências
+        """
+        # Verifica se o usuário existe
+        usuario = self._repository.buscar_por_id(id)
+        if not usuario:
+            raise ValueError("Usuário não encontrado")
+        
+        # Tenta excluir o usuário
+        try:
+            self._repository.excluir(id)
+        except ValueError as e:
+            # Propaga o erro se houver dependências
+            raise ValueError(str(e))

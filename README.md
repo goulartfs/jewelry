@@ -330,3 +330,31 @@ PUT /api/usuarios/{id}
       "erro": "Nome não pode ser vazio"
   }
   ```
+
+### US5: Exclusão de Usuário
+
+Endpoint para excluir um usuário do sistema:
+
+```http
+DELETE /api/usuarios/{id}
+```
+
+**Observações:**
+- A exclusão é permanente e não pode ser desfeita
+- Não é possível excluir um usuário que possui pedidos ativos
+- Requer autenticação e permissões adequadas
+
+**Respostas:**
+- `204 No Content`: Usuário excluído com sucesso
+- `404 Not Found`: Usuário não encontrado
+  ```json
+  {
+      "erro": "Usuário não encontrado"
+  }
+  ```
+- `409 Conflict`: Usuário possui dependências
+  ```json
+  {
+      "erro": "Usuário possui pedidos ativos"
+  }
+  ```

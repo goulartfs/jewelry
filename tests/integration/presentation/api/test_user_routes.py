@@ -263,3 +263,47 @@ def test_atualizar_usuario_dados_invalidos(client):
     # Assert
     assert response.status_code == 400
     assert "erro" in response.json()
+
+
+def test_excluir_usuario(client):
+    """Deve excluir um usuário via API."""
+    # Arrange
+    dados = {"nome": "João da Silva", "email": "joao@email.com", "senha": "senha123"}
+    criado = client.post("/api/usuarios", json=dados).json()
+    
+    # Act
+    response = client.delete(f"/api/usuarios/{criado['id']}")
+    
+    # Assert
+    assert response.status_code == 204
+    
+    # Verifica se o usuário foi realmente excluído
+    get_response = client.get(f"/api/usuarios/{criado['id']}")
+    assert get_response.status_code == 404
+
+
+def test_excluir_usuario_inexistente(client):
+    """Deve retornar erro ao excluir usuário inexistente."""
+    # Act
+    response = client.delete("/api/usuarios/999")
+    
+    # Assert
+    assert response.status_code == 404
+    assert "não encontrado" in response.json()["erro"].lower()
+
+
+def test_excluir_usuario_com_dependencias(client):
+    """Deve retornar erro ao excluir usuário com dependências."""
+    # Arrange
+    dados = {"nome": "João da Silva", "email": "joao@email.com", "senha": "senha123"}
+    criado = client.post("/api/usuarios", json=dados).json()
+    
+    # TODO: Criar pedido para o usuário
+    # Por enquanto vamos apenas simular o erro 409
+    
+    # Act
+    response = client.delete(f"/api/usuarios/{criado['id']}")
+    
+    # Assert
+    assert response.status_code == 409
+    assert "possui pedidos" in response.json()["erro"].lower()

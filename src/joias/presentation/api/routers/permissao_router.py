@@ -1,7 +1,7 @@
 """
 Router para endpoints de Permissão.
 """
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 
 from ....application.dtos.permissao import CriarPermissaoDTO, PermissaoDTO
@@ -15,19 +15,19 @@ router = APIRouter(prefix="/permissoes", tags=["Permissões"])
 @router.post(
     "",
     response_model=PermissaoDTO,
-    status_code=201,
+    status_code=status.HTTP_201_CREATED,
     description="Cria uma nova permissão",
 )
 def criar_permissao(
     dados: CriarPermissaoDTO,
-    repository: IPermissaoRepository = Depends(get_permissao_repository),
+    permissao_repository: IPermissaoRepository = Depends(get_permissao_repository),
 ) -> PermissaoDTO:
     """
     Cria uma nova permissão.
 
     Args:
         dados: Dados da permissão
-        repository: Repositório de permissões (injetado)
+        permissao_repository: Repositório de permissões (injetado)
 
     Returns:
         Dados da permissão criada
@@ -36,7 +36,7 @@ def criar_permissao(
         HTTPException: Se houver erro de validação
     """
     try:
-        service = PermissaoService(repository)
+        service = PermissaoService(permissao_repository)
         return service.criar_permissao(dados)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

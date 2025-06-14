@@ -758,3 +758,44 @@ DELETE /perfis/{id}
       "detail": "Não é possível excluir um perfil que possui permissões associadas"
   }
   ```
+
+### US11: Criação de Permissão
+
+Endpoint para criar uma nova permissão no sistema.
+
+```http
+POST /permissoes
+```
+
+**Requisição:**
+```json
+{
+    "nome": "Acesso Total",
+    "chave": "ACCESS_ALL",
+    "descricao": "Permite acesso total ao sistema"
+}
+```
+
+**Observações:**
+- Todos os campos são obrigatórios
+- A chave é automaticamente convertida para maiúsculas
+- A chave deve ser única no sistema
+- A chave é utilizada no código para verificação de acesso
+- Requer autenticação e permissões adequadas
+
+**Respostas:**
+- `201 Created`: Permissão criada
+  ```json
+  {
+      "id": "123e4567-e89b-12d3-a456-426614174000",
+      "nome": "Acesso Total",
+      "chave": "ACCESS_ALL",
+      "descricao": "Permite acesso total ao sistema"
+  }
+  ```
+- `400 Bad Request`: Dados inválidos ou chave já existente
+  ```json
+  {
+      "detail": "Chave de permissão já cadastrada: ACCESS_ALL"
+  }
+  ```

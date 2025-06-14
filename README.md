@@ -490,3 +490,148 @@ O sistema verifica automaticamente:
 Em caso de acesso não autorizado:
 - `401 Unauthorized`: Token inválido ou expirado
 - `403 Forbidden`: Usuário sem permissão necessária
+
+### US7: Cadastro e Associação de Permissões
+
+Endpoints para gerenciamento de permissões e sua associação com perfis.
+
+#### Endpoints de Permissão
+
+1. **Criar Permissão**
+```http
+POST /permissoes
+```
+
+**Requisição:**
+```json
+{
+    "nome": "Acesso Total",
+    "chave": "ACCESS_ALL",
+    "descricao": "Permite acesso total ao sistema"
+}
+```
+
+**Respostas:**
+- `201 Created`: Permissão criada
+  ```json
+  {
+      "id": "123e4567-e89b-12d3-a456-426614174000",
+      "nome": "Acesso Total",
+      "chave": "ACCESS_ALL",
+      "descricao": "Permite acesso total ao sistema"
+  }
+  ```
+- `400 Bad Request`: Dados inválidos
+  ```json
+  {
+      "detail": "Chave de permissão já cadastrada: ACCESS_ALL"
+  }
+  ```
+
+2. **Buscar Permissão**
+```http
+GET /permissoes/{id}
+```
+
+**Respostas:**
+- `200 OK`: Permissão encontrada
+  ```json
+  {
+      "id": "123e4567-e89b-12d3-a456-426614174000",
+      "nome": "Acesso Total",
+      "chave": "ACCESS_ALL",
+      "descricao": "Permite acesso total ao sistema"
+  }
+  ```
+- `404 Not Found`: Permissão não encontrada
+  ```json
+  {
+      "detail": "Permissão não encontrada"
+  }
+  ```
+
+3. **Listar Permissões**
+```http
+GET /permissoes
+```
+
+**Resposta:**
+```json
+[
+    {
+        "id": "123e4567-e89b-12d3-a456-426614174000",
+        "nome": "Acesso Total",
+        "chave": "ACCESS_ALL",
+        "descricao": "Permite acesso total ao sistema"
+    },
+    {
+        "id": "223e4567-e89b-12d3-a456-426614174000",
+        "nome": "Leitura de Pedidos",
+        "chave": "READ_ORDERS",
+        "descricao": "Permite visualizar pedidos"
+    }
+]
+```
+
+#### Endpoints de Associação Perfil-Permissão
+
+1. **Adicionar Permissão ao Perfil**
+```http
+POST /perfis/{perfil_id}/permissoes/{permissao_id}
+```
+
+**Respostas:**
+- `200 OK`: Permissão adicionada
+  ```json
+  {
+      "id": "323e4567-e89b-12d3-a456-426614174000",
+      "nome": "Administrador",
+      "descricao": "Perfil com acesso total",
+      "data_criacao": "2024-01-20T10:30:00Z",
+      "permissoes": [
+          {
+              "id": "123e4567-e89b-12d3-a456-426614174000",
+              "nome": "Acesso Total",
+              "chave": "ACCESS_ALL",
+              "descricao": "Permite acesso total ao sistema"
+          }
+      ]
+  }
+  ```
+- `404 Not Found`: Perfil ou permissão não encontrados
+  ```json
+  {
+      "detail": "Perfil não encontrado"
+  }
+  ```
+
+2. **Remover Permissão do Perfil**
+```http
+DELETE /perfis/{perfil_id}/permissoes/{permissao_id}
+```
+
+**Respostas:**
+- `200 OK`: Permissão removida
+  ```json
+  {
+      "id": "323e4567-e89b-12d3-a456-426614174000",
+      "nome": "Administrador",
+      "descricao": "Perfil com acesso total",
+      "data_criacao": "2024-01-20T10:30:00Z",
+      "permissoes": []
+  }
+  ```
+- `404 Not Found`: Perfil ou permissão não encontrados
+  ```json
+  {
+      "detail": "Permissão não encontrada"
+  }
+  ```
+
+#### Observações
+
+1. A chave da permissão (`chave`) é única e usada no código para verificação de acesso
+2. A chave é automaticamente convertida para maiúsculas ao ser salva
+3. Um perfil pode ter múltiplas permissões
+4. Uma permissão pode estar associada a múltiplos perfis
+5. A remoção de uma permissão de um perfil não exclui a permissão do sistema

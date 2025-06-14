@@ -7,7 +7,7 @@ from ...domain.entities.perfil import Perfil
 from ...domain.entities.permissao import Permissao
 from ...domain.repositories.perfil_repository import IPerfilRepository
 from ...domain.repositories.permissao_repository import IPermissaoRepository
-from ..dtos.perfil import CriarPerfilDTO, PerfilDTO
+from ..dtos.perfil import CriarPerfilDTO, PerfilDTO, AtualizarPerfilDTO
 from ..dtos.permissao import PermissaoDTO
 
 
@@ -65,6 +65,56 @@ class PerfilService:
             nome=perfil.nome,
             descricao=perfil.descricao,
             permissoes=[],
+            data_criacao=perfil.data_criacao,
+        )
+
+    def atualizar_perfil(self, id: str, dados: AtualizarPerfilDTO) -> PerfilDTO:
+        """
+        Atualiza um perfil existente.
+
+        Args:
+            id: ID do perfil
+            dados: DTO com os dados a serem atualizados
+
+        Returns:
+            DTO com os dados do perfil atualizado
+
+        Raises:
+            ValueError: Se o perfil não existir ou os dados forem inválidos
+        """
+        # Busca o perfil
+        perfil = self._perfil_repository.buscar_por_id(id)
+        if not perfil:
+            raise ValueError("Perfil não encontrado")
+
+        # Verifica se o novo nome já existe (se foi fornecido)
+        if dados.nome and dados.nome != perfil.nome:
+            perfil_existente = self._perfil_repository.buscar_por_nome(dados.nome)
+            if perfil_existente:
+                raise ValueError(f"Nome de perfil já cadastrado: {dados.nome}")
+            perfil.nome = dados.nome
+
+        # Atualiza a descrição se fornecida
+        if dados.descricao is not None:
+            perfil.descricao = dados.descricao
+
+        # Atualiza o perfil
+        perfil = self._perfil_repository.atualizar(perfil)
+
+        # Retorna o DTO atualizado
+        return PerfilDTO(
+            id=str(perfil.id),
+            nome=perfil.nome,
+            descricao=perfil.descricao,
+            permissoes=[
+                PermissaoDTO(
+                    id=str(p.id),
+                    nome=p.nome,
+                    chave=p.chave,
+                    descricao=p.descricao,
+                )
+                for p in perfil.permissoes
+            ],
             data_criacao=perfil.data_criacao,
         )
 

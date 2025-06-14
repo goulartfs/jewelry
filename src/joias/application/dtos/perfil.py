@@ -16,6 +16,13 @@ class CriarPerfilDTO(BaseModel):
     descricao: Optional[str] = Field(None, description="Descrição detalhada")
 
 
+class AtualizarPerfilDTO(BaseModel):
+    """DTO para atualização de um perfil."""
+
+    nome: Optional[str] = None
+    descricao: Optional[str] = None
+
+
 class PerfilDTO(BaseModel):
     """DTO para retorno de dados de um perfil."""
 

@@ -676,3 +676,56 @@ GET /perfis/{id}
 3. As permissões são retornadas com todos os seus detalhes (id, nome, chave e descrição)
 4. O acesso a este endpoint requer autenticação
 5. A remoção de uma permissão de um perfil não exclui a permissão do sistema
+
+### US9: Atualização de Perfil
+
+Endpoint para atualizar os dados de um perfil existente.
+
+```http
+PUT /perfis/{id}
+```
+
+**Requisição:**
+```json
+{
+    "nome": "Administrador Sênior",
+    "descricao": "Perfil com acesso total ao sistema"
+}
+```
+
+**Observações:**
+- Todos os campos são opcionais
+- Apenas os campos fornecidos serão atualizados
+- O nome deve ser único no sistema
+- As permissões não são alteradas por este endpoint
+
+**Respostas:**
+- `200 OK`: Perfil atualizado
+  ```json
+  {
+      "id": "323e4567-e89b-12d3-a456-426614174000",
+      "nome": "Administrador Sênior",
+      "descricao": "Perfil com acesso total ao sistema",
+      "data_criacao": "2024-01-20T10:30:00Z",
+      "permissoes": [
+          {
+              "id": "123e4567-e89b-12d3-a456-426614174000",
+              "nome": "Acesso Total",
+              "chave": "ACCESS_ALL",
+              "descricao": "Permite acesso total ao sistema"
+          }
+      ]
+  }
+  ```
+- `404 Not Found`: Perfil não encontrado
+  ```json
+  {
+      "detail": "Perfil não encontrado"
+  }
+  ```
+- `400 Bad Request`: Nome já cadastrado
+  ```json
+  {
+      "detail": "Nome de perfil já cadastrado: Administrador Sênior"
+  }
+  ```

@@ -4,7 +4,7 @@ Router para endpoints de Perfil.
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List
 
-from ....application.dtos.perfil import CriarPerfilDTO, PerfilDTO
+from ....application.dtos.perfil import CriarPerfilDTO, PerfilDTO, AtualizarPerfilDTO
 from ....application.identity.perfil_service import PerfilService
 from ....domain.repositories.perfil_repository import IPerfilRepository
 from ....domain.repositories.permissao_repository import IPermissaoRepository
@@ -164,4 +164,37 @@ def remover_permissao(
         service = PerfilService(perfil_repository, permissao_repository)
         return service.remover_permissao(perfil_id, permissao_id)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e)) 
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.put(
+    "/{id}",
+    response_model=PerfilDTO,
+    description="Atualiza um perfil existente",
+)
+def atualizar_perfil(
+    id: str,
+    dados: AtualizarPerfilDTO,
+    perfil_repository: IPerfilRepository = Depends(get_perfil_repository),
+    permissao_repository: IPermissaoRepository = Depends(get_permissao_repository),
+) -> PerfilDTO:
+    """
+    Atualiza um perfil existente.
+
+    Args:
+        id: ID do perfil
+        dados: Dados do perfil a serem atualizados
+        perfil_repository: Repositório de perfis (injetado)
+        permissao_repository: Repositório de permissões (injetado)
+
+    Returns:
+        Dados do perfil atualizado
+
+    Raises:
+        HTTPException: Se o perfil não for encontrado ou houver erro de validação
+    """
+    try:
+        service = PerfilService(perfil_repository, permissao_repository)
+        return service.atualizar_perfil(id, dados)
+    except ValueError as e:
+        raise HTTPException(status_code=404 if "não encontrado" in str(e) else 400, detail=str(e)) 

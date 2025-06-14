@@ -79,16 +79,16 @@ def buscar_permissao(
     description="Lista todas as permissões",
 )
 def listar_permissoes(
-    repository: IPermissaoRepository = Depends(get_permissao_repository),
+    permissao_repository: IPermissaoRepository = Depends(get_permissao_repository),
 ) -> List[PermissaoDTO]:
     """
     Lista todas as permissões.
 
     Args:
-        repository: Repositório de permissões (injetado)
+        permissao_repository: Repositório de permissões (injetado)
 
     Returns:
         Lista de permissões
     """
-    service = PermissaoService(repository)
+    service = PermissaoService(permissao_repository)
     return service.listar_permissoes() 

@@ -1,223 +1,152 @@
 """
-Router de usuários.
+Rotas da API para gerenciamento de usuários.
 
-Este módulo implementa as rotas de usuários da API,
-incluindo CRUD e operações específicas.
+Este módulo implementa os endpoints REST para operações
+relacionadas a usuários.
 """
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 
-from ....infrastructure.persistence.sqlalchemy.session import get_db
-from ....application.identity.user_service import UserService
-from ....domain.identity.entities.usuario import Usuario
-from ....domain.shared.value_objects.email import Email
-from ..schemas.user import (
-    UserCreate,
-    UserUpdate,
-    UserResponse,
-    UserList
+from fastapi import APIRouter, HTTPException, Depends, Query
+from pydantic import BaseModel, EmailStr
+
+from ....application.identity.user_service import (
+    UserService,
+    CriarUsuarioDTO,
+    UsuarioDTO
 )
-from ..dependencies.auth import get_current_user
+from ....domain.identity.repositories.usuario_repository import IUsuarioRepository
+from ..dependencies.repositories import get_usuario_repository
 
-router = APIRouter()
+
+router = APIRouter(prefix="/api/usuarios", tags=["Usuários"])
 
 
-@router.post("/users", response_model=UserResponse)
-async def create_user(
-    user: UserCreate,
-    db: Session = Depends(get_db),
-    current_user: Usuario = Depends(get_current_user)
-) -> Usuario:
+class CriarUsuarioRequest(BaseModel):
+    """Schema para requisição de criação de usuário."""
+    nome: str
+    email: EmailStr
+    senha: str
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "nome": "João da Silva",
+                "email": "joao@email.com",
+                "senha": "senha123"
+            }
+        }
+
+
+@router.post(
+    "",
+    response_model=UsuarioDTO,
+    status_code=201,
+    description="Cria um novo usuário no sistema"
+)
+def criar_usuario(
+    dados: CriarUsuarioRequest,
+    repository: IUsuarioRepository = Depends(get_usuario_repository)
+) -> UsuarioDTO:
     """
-    Cria um novo usuário.
-
+    Cria um novo usuário no sistema.
+    
+    Este endpoint implementa o caso de uso US1, permitindo o cadastro
+    de novos usuários com nome, email e senha.
+    
     Args:
-        user: Dados do usuário a ser criado
-        db: Sessão do banco de dados
-        current_user: Usuário autenticado
-
+        dados: Dados do usuário a ser criado
+        repository: Repositório de usuários (injetado)
+        
     Returns:
-        Usuario: Usuário criado
-
+        Dados do usuário criado
+        
     Raises:
-        HTTPException: Se houver erro na criação
+        HTTPException: Se houver erro de validação ou conflito
     """
-    user_service = UserService(db)
-    
     try:
-        email = Email(user.email)
-        created_user = user_service.create_user(
-            email=email,
-            nome=user.nome,
-            senha=user.senha,
-            empresa_id=current_user.empresa_id
+        service = UserService(repository)
+        return service.criar_usuario(
+            CriarUsuarioDTO(
+                nome=dados.nome,
+                email=dados.email,
+                senha=dados.senha
+            )
         )
-        return created_user
-    
     except ValueError as e:
+        if "já cadastrado" in str(e):
+            raise HTTPException(
+                status_code=409,
+                detail=str(e)
+            )
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=400,
             detail=str(e)
         )
 
 
-@router.get("/users", response_model=UserList)
-async def list_users(
-    skip: int = 0,
-    limit: int = 100,
-    search: Optional[str] = None,
-    db: Session = Depends(get_db),
-    current_user: Usuario = Depends(get_current_user)
-) -> List[Usuario]:
-    """
-    Lista usuários.
-
-    Args:
-        skip: Número de registros para pular
-        limit: Número máximo de registros
-        search: Termo de busca
-        db: Sessão do banco de dados
-        current_user: Usuário autenticado
-
-    Returns:
-        List[Usuario]: Lista de usuários
-    """
-    user_service = UserService(db)
-    return user_service.list_users(
-        empresa_id=current_user.empresa_id,
-        skip=skip,
-        limit=limit,
-        search=search
-    )
-
-
-@router.get("/users/{user_id}", response_model=UserResponse)
-async def get_user(
-    user_id: str,
-    db: Session = Depends(get_db),
-    current_user: Usuario = Depends(get_current_user)
-) -> Usuario:
+@router.get(
+    "/{id}",
+    response_model=UsuarioDTO,
+    description="Retorna os dados de um usuário específico"
+)
+def buscar_usuario(
+    id: str,
+    repository: IUsuarioRepository = Depends(get_usuario_repository)
+) -> UsuarioDTO:
     """
     Busca um usuário pelo ID.
-
+    
     Args:
-        user_id: ID do usuário
-        db: Sessão do banco de dados
-        current_user: Usuário autenticado
-
+        id: ID do usuário
+        repository: Repositório de usuários (injetado)
+        
     Returns:
-        Usuario: Usuário encontrado
-
+        Dados do usuário
+        
     Raises:
         HTTPException: Se o usuário não for encontrado
     """
-    user_service = UserService(db)
-    user = user_service.get_user(user_id)
+    service = UserService(repository)
+    usuario = service.buscar_usuario(id)
     
-    if user is None:
+    if not usuario:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=404,
             detail="Usuário não encontrado"
         )
-    
-    if user.empresa_id != current_user.empresa_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Acesso negado"
-        )
-    
-    return user
+        
+    return usuario
 
 
-@router.put("/users/{user_id}", response_model=UserResponse)
-async def update_user(
-    user_id: str,
-    user: UserUpdate,
-    db: Session = Depends(get_db),
-    current_user: Usuario = Depends(get_current_user)
-) -> Usuario:
+@router.get(
+    "",
+    response_model=List[UsuarioDTO],
+    description="Lista usuários com paginação e filtros"
+)
+def listar_usuarios(
+    pagina: int = Query(1, ge=1, description="Número da página"),
+    tamanho: int = Query(10, ge=1, le=100, description="Tamanho da página"),
+    email: Optional[str] = Query(None, description="Filtro por email"),
+    nome: Optional[str] = Query(None, description="Filtro por nome"),
+    repository: IUsuarioRepository = Depends(get_usuario_repository)
+) -> List[UsuarioDTO]:
     """
-    Atualiza um usuário.
-
+    Lista usuários com paginação e filtros opcionais.
+    
     Args:
-        user_id: ID do usuário
-        user: Dados do usuário
-        db: Sessão do banco de dados
-        current_user: Usuário autenticado
-
+        pagina: Número da página
+        tamanho: Tamanho da página
+        email: Filtro por email
+        nome: Filtro por nome
+        repository: Repositório de usuários (injetado)
+        
     Returns:
-        Usuario: Usuário atualizado
-
-    Raises:
-        HTTPException: Se houver erro na atualização
+        Lista de usuários
     """
-    user_service = UserService(db)
-    existing_user = user_service.get_user(user_id)
-    
-    if existing_user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Usuário não encontrado"
-        )
-    
-    if existing_user.empresa_id != current_user.empresa_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Acesso negado"
-        )
-    
-    try:
-        email = Email(user.email) if user.email else None
-        updated_user = user_service.update_user(
-            user_id=user_id,
-            email=email,
-            nome=user.nome,
-            senha=user.senha
-        )
-        return updated_user
-    
-    except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
-
-
-@router.delete("/users/{user_id}")
-async def delete_user(
-    user_id: str,
-    db: Session = Depends(get_db),
-    current_user: Usuario = Depends(get_current_user)
-) -> dict:
-    """
-    Remove um usuário.
-
-    Args:
-        user_id: ID do usuário
-        db: Sessão do banco de dados
-        current_user: Usuário autenticado
-
-    Returns:
-        dict: Mensagem de sucesso
-
-    Raises:
-        HTTPException: Se houver erro na remoção
-    """
-    user_service = UserService(db)
-    existing_user = user_service.get_user(user_id)
-    
-    if existing_user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Usuário não encontrado"
-        )
-    
-    if existing_user.empresa_id != current_user.empresa_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Acesso negado"
-        )
-    
-    user_service.delete_user(user_id)
-    return {"message": "Usuário removido com sucesso"} 
+    service = UserService(repository)
+    return service.listar_usuarios(
+        pagina=pagina,
+        tamanho=tamanho,
+        email=email,
+        nome=nome
+    ) 

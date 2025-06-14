@@ -1,1 +1,58 @@
-"""Objeto de valor para endereços de e-mail.\n\nEsta classe implementa a validação e normalização de endereços\nde e-mail.\n"""\nimport re\nfrom dataclasses import dataclass\nfrom typing import ClassVar\n\nfrom .value_object import ValueObject\n\n\n@dataclass(frozen=True)\nclass Email(ValueObject):\n    """\n    Objeto de valor para endereços de e-mail.\n    \n    Esta classe garante que apenas endereços de e-mail válidos\n    sejam aceitos e armazenados.\n    \n    Attributes:\n        address: O endereço de e-mail.\n    """\n    \n    address: str\n    \n    # Expressão regular para validação de e-mail\n    _EMAIL_REGEX: ClassVar[str] = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"\n    \n    def __post_init__(self):\n        """\n        Valida o endereço de e-mail após a inicialização.\n        \n        Raises:\n            ValueError: Se o endereço de e-mail for inválido.\n        """\n        if not self._is_valid(self.address):\n            raise ValueError(f"Endereço de e-mail inválido: {self.address}")\n            \n    @classmethod\n    def _is_valid(cls, address: str) -> bool:\n        """\n        Verifica se um endereço de e-mail é válido.\n        \n        Args:\n            address: O endereço de e-mail a ser validado.\n            \n        Returns:\n            True se o endereço for válido, False caso contrário.\n        """\n        if not address:\n            return False\n        return bool(re.match(cls._EMAIL_REGEX, address))\n        \n    def __str__(self) -> str:\n        """\n        Retorna a representação em string do e-mail.\n        \n        Returns:\n            O endereço de e-mail.\n        """\n        return self.address
+"""
+Objeto de valor para endereços de email.
+
+Este módulo define um objeto de valor que representa
+e valida endereços de email.
+"""
+import re
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class Email:
+    """
+    Objeto de valor para endereços de email.
+    
+    Esta classe encapsula a lógica de validação e representação
+    de endereços de email, garantindo que apenas emails válidos
+    sejam aceitos.
+    
+    Attributes:
+        valor: O endereço de email
+    """
+    
+    valor: str
+    
+    def __post_init__(self) -> None:
+        """
+        Valida o email após a inicialização.
+        
+        Raises:
+            ValueError: Se o email for inválido
+        """
+        if not self.valor:
+            raise ValueError("Email não pode estar vazio")
+            
+        if not self._is_valid_email(self.valor):
+            raise ValueError(f"Email inválido: {self.valor}")
+            
+        # Força o email para minúsculas
+        object.__setattr__(self, "valor", self.valor.lower())
+        
+    def __str__(self) -> str:
+        """Retorna o email como string."""
+        return self.valor
+        
+    @staticmethod
+    def _is_valid_email(email: str) -> bool:
+        """
+        Verifica se um email é válido.
+        
+        Args:
+            email: O email a ser validado
+            
+        Returns:
+            True se o email for válido
+        """
+        pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        return bool(re.match(pattern, email))

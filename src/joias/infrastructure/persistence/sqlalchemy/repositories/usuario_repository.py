@@ -1,162 +1,208 @@
 """
-Repositório de usuários.
+Implementação SQLAlchemy do repositório de usuários.
 
-Este módulo implementa o repositório de usuários usando SQLAlchemy,
-seguindo o padrão Repository do DDD.
+Este módulo implementa o repositório de usuários usando
+SQLAlchemy como ORM para persistência.
 """
 from typing import List, Optional
-from uuid import UUID
+from uuid import uuid4
+
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from .....domain.identity.entities.usuario import Usuario
+from .....domain.identity.repositories.usuario_repository import IUsuarioRepository
 from .....domain.shared.value_objects.email import Email
-from ....persistence.sqlalchemy.models import Usuario as UsuarioModel
+from ..models.usuario import UsuarioModel
 
 
-class UsuarioRepository:
+class SQLUsuarioRepository(IUsuarioRepository):
     """
-    Repositório de usuários.
-
-    Esta classe implementa as operações de persistência
-    para a entidade Usuario usando SQLAlchemy.
+    Implementação SQLAlchemy do repositório de usuários.
+    
+    Esta classe implementa a interface IUsuarioRepository usando
+    SQLAlchemy para persistência dos dados.
     """
-
+    
     def __init__(self, session: Session):
         """
-        Inicializa o repositório.
-
+        Inicializa o repositório com uma sessão do SQLAlchemy.
+        
         Args:
             session: Sessão do SQLAlchemy
         """
-        self.session = session
-
-    def proximo_id(self) -> UUID:
+        self._session = session
+        
+    def criar(self, usuario: Usuario) -> Usuario:
         """
-        Gera o próximo ID para um novo usuário.
-
-        Returns:
-            UUID: Novo identificador único
-        """
-        return UUID.uuid4()
-
-    def salvar(self, usuario: Usuario) -> Usuario:
-        """
-        Persiste um usuário no banco de dados.
-
+        Persiste um novo usuário.
+        
         Args:
-            usuario: Usuário a ser salvo
-
+            usuario: O usuário a ser persistido
+            
         Returns:
-            Usuario: Usuário salvo
-
+            O usuário persistido
+            
         Raises:
-            ValueError: Se houver erro de validação
+            ValueError: Se o email já existir
         """
+        # Verifica se o email já existe
+        if self.buscar_por_email(usuario.email):
+            raise ValueError(f"Email já cadastrado: {usuario.email}")
+            
+        # Cria o modelo
         model = UsuarioModel(
-            id=usuario.id,
-            email=str(usuario.email),
+            id=str(uuid4()),
             nome=usuario.nome,
-            senha_hash=usuario.senha_hash,
-            ativo=usuario.ativo,
-            empresa_id=usuario.empresa_id if usuario.empresa_id else None
+            email=str(usuario.email),
+            senha_hashed=usuario.senha_hashed,
+            data_criacao=usuario.data_criacao,
+            ativo=usuario.ativo
         )
-
-        self.session.add(model)
-        self.session.commit()
-        self.session.refresh(model)
-
+        
+        # Persiste
+        self._session.add(model)
+        self._session.commit()
+        
+        # Retorna o usuário
         return self._to_entity(model)
-
-    def buscar_por_id(self, id: UUID) -> Optional[Usuario]:
+        
+    def buscar_por_id(self, id: str) -> Optional[Usuario]:
         """
-        Busca um usuário pelo ID.
-
+        Busca um usuário pelo seu ID.
+        
         Args:
-            id: ID do usuário
-
+            id: O ID do usuário
+            
         Returns:
-            Optional[Usuario]: Usuário encontrado ou None
+            O usuário encontrado ou None
         """
-        model = self.session.query(UsuarioModel).filter(
-            UsuarioModel.id == id
-        ).first()
-
-        if model:
-            return self._to_entity(model)
-        return None
-
+        model = self._session.query(UsuarioModel).get(id)
+        
+        if not model:
+            return None
+            
+        return self._to_entity(model)
+        
     def buscar_por_email(self, email: Email) -> Optional[Usuario]:
         """
-        Busca um usuário pelo email.
-
+        Busca um usuário pelo seu email.
+        
         Args:
-            email: Email do usuário
-
+            email: O email do usuário
+            
         Returns:
-            Optional[Usuario]: Usuário encontrado ou None
+            O usuário encontrado ou None
         """
-        model = self.session.query(UsuarioModel).filter(
-            UsuarioModel.email == str(email)
-        ).first()
-
-        if model:
-            return self._to_entity(model)
-        return None
-
-    def listar(self, apenas_ativos: bool = True) -> List[Usuario]:
+        model = (
+            self._session.query(UsuarioModel)
+            .filter(UsuarioModel.email == str(email))
+            .first()
+        )
+        
+        if not model:
+            return None
+            
+        return self._to_entity(model)
+        
+    def listar(
+        self,
+        pagina: int = 1,
+        tamanho: int = 10,
+        email: Optional[str] = None,
+        nome: Optional[str] = None
+    ) -> List[Usuario]:
         """
-        Lista todos os usuários.
-
+        Lista usuários com paginação e filtros opcionais.
+        
         Args:
-            apenas_ativos: Se True, retorna apenas usuários ativos
-
+            pagina: Número da página (1-based)
+            tamanho: Tamanho da página
+            email: Filtro por email
+            nome: Filtro por nome
+            
         Returns:
-            List[Usuario]: Lista de usuários
+            Lista de usuários
         """
-        query = self.session.query(UsuarioModel)
-        if apenas_ativos:
-            query = query.filter(UsuarioModel.ativo == True)
-
+        query = self._session.query(UsuarioModel)
+        
+        # Aplica filtros
+        if email or nome:
+            query = query.filter(
+                or_(
+                    UsuarioModel.email.ilike(f"%{email}%") if email else False,
+                    UsuarioModel.nome.ilike(f"%{nome}%") if nome else False
+                )
+            )
+            
+        # Aplica paginação
+        offset = (pagina - 1) * tamanho
+        query = query.offset(offset).limit(tamanho)
+        
+        # Converte para entidades
         return [self._to_entity(model) for model in query.all()]
-
-    def excluir(self, id: UUID) -> bool:
+        
+    def atualizar(self, usuario: Usuario) -> Usuario:
         """
-        Remove um usuário do banco de dados.
-
+        Atualiza um usuário existente.
+        
         Args:
-            id: ID do usuário
-
+            usuario: O usuário com as alterações
+            
         Returns:
-            bool: True se removido com sucesso
+            O usuário atualizado
+            
+        Raises:
+            ValueError: Se o usuário não existir
         """
-        model = self.session.query(UsuarioModel).filter(
-            UsuarioModel.id == id
-        ).first()
-
-        if model:
-            self.session.delete(model)
-            self.session.commit()
-            return True
-        return False
-
+        model = self._session.query(UsuarioModel).get(str(usuario.id))
+        
+        if not model:
+            raise ValueError(f"Usuário não encontrado: {usuario.id}")
+            
+        # Atualiza os campos
+        model.nome = usuario.nome
+        model.email = str(usuario.email)
+        model.senha_hashed = usuario.senha_hashed
+        model.ativo = usuario.ativo
+        
+        # Persiste
+        self._session.commit()
+        
+        return self._to_entity(model)
+        
+    def excluir(self, id: str) -> None:
+        """
+        Remove um usuário do repositório.
+        
+        Args:
+            id: O ID do usuário
+            
+        Raises:
+            ValueError: Se o usuário não existir
+        """
+        model = self._session.query(UsuarioModel).get(id)
+        
+        if not model:
+            raise ValueError(f"Usuário não encontrado: {id}")
+            
+        self._session.delete(model)
+        self._session.commit()
+        
     def _to_entity(self, model: UsuarioModel) -> Usuario:
         """
-        Converte um modelo do SQLAlchemy para uma entidade.
-
+        Converte um modelo SQLAlchemy para uma entidade de domínio.
+        
         Args:
-            model: Modelo do SQLAlchemy
-
+            model: O modelo SQLAlchemy
+            
         Returns:
-            Usuario: Entidade de usuário
+            A entidade de domínio
         """
         return Usuario(
-            id=model.id,
-            email=Email(model.email),
             nome=model.nome,
-            senha_hash=model.senha_hash,
-            ativo=model.ativo,
-            empresa_id=model.empresa_id if model.empresa_id else None,
-            created_at=model.created_at,
-            updated_at=model.updated_at,
-            deleted_at=model.deleted_at
+            email=Email(model.email),
+            senha_hashed=model.senha_hashed,
+            data_criacao=model.data_criacao,
+            ativo=model.ativo
         ) 

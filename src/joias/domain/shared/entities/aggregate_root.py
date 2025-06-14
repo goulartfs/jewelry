@@ -1,51 +1,53 @@
 """
 Classe base para agregados do domínio.
 
-Esta classe fornece a funcionalidade básica necessária para
-implementar agregados do domínio, incluindo o gerenciamento
-de eventos de domínio.
+Este módulo define a classe base para agregados do domínio,
+seguindo os princípios do DDD.
 """
 from abc import ABC
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Optional
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from ..events.domain_event import DomainEvent
 
 
-@dataclass
 class AggregateRoot(ABC):
     """
-    Classe base para agregados.
-
-    Esta classe implementa funcionalidades comuns a todos os agregados
-    como gerenciamento de eventos de domínio e controle de versão.
-
-    Attributes:
-        id: Identificador único do agregado
-        version: Versão do agregado para controle de concorrência
-        created_at: Data de criação
-        updated_at: Data da última atualização
-        deleted_at: Data de exclusão (soft delete)
-        _events: Lista de eventos de domínio pendentes
+    Classe base para agregados do domínio.
+    
+    Esta classe fornece funcionalidades comuns a todos os
+    agregados, como identidade e eventos de domínio.
     """
-
-    id: UUID
-    version: int = field(default=1)
-    created_at: datetime = field(default_factory=datetime.utcnow)
-    updated_at: datetime = field(default_factory=datetime.utcnow)
-    deleted_at: Optional[datetime] = field(default=None)
-    _events: List[DomainEvent] = field(default_factory=list, init=False)
-
-    def __init__(self):
+    
+    def __init__(self) -> None:
         """Inicializa um novo agregado."""
-        self._domain_events: List[DomainEvent] = []
-
+        self._id = uuid4()
+        self._eventos: List[object] = []
+        
     @property
-    def domain_events(self) -> List[DomainEvent]:
-        """Retorna a lista de eventos de domínio pendentes."""
-        return self._domain_events
+    def id(self) -> UUID:
+        """Retorna o ID do agregado."""
+        return self._id
+        
+    @property
+    def eventos(self) -> List[object]:
+        """Retorna os eventos pendentes do agregado."""
+        return self._eventos.copy()
+        
+    def adicionar_evento(self, evento: object) -> None:
+        """
+        Adiciona um evento ao agregado.
+        
+        Args:
+            evento: O evento a ser adicionado
+        """
+        self._eventos.append(evento)
+        
+    def limpar_eventos(self) -> None:
+        """Limpa a lista de eventos pendentes."""
+        self._eventos.clear()
 
     def add_domain_event(self, event: DomainEvent) -> None:
         """
@@ -54,31 +56,11 @@ class AggregateRoot(ABC):
         Args:
             event: O evento de domínio a ser adicionado.
         """
-        self._domain_events.append(event)
+        self._eventos.append(event)
 
     def clear_domain_events(self) -> None:
         """Remove todos os eventos de domínio pendentes."""
-        self._domain_events.clear()
-
-    def adicionar_evento(self, evento: DomainEvent) -> None:
-        """
-        Adiciona um evento de domínio à lista de eventos pendentes.
-
-        Args:
-            evento: O evento a ser adicionado
-        """
-        self._events.append(evento)
-
-    def limpar_eventos(self) -> List[DomainEvent]:
-        """
-        Remove e retorna todos os eventos pendentes.
-
-        Returns:
-            List[DomainEvent]: Lista de eventos pendentes
-        """
-        eventos = self._events.copy()
-        self._events.clear()
-        return eventos
+        self._eventos.clear()
 
     def incrementar_versao(self) -> None:
         """Incrementa a versão do agregado."""

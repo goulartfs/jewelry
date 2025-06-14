@@ -1,180 +1,160 @@
 """
-Serviço de usuários.
+Serviço de aplicação para gerenciamento de usuários.
 
-Este módulo implementa o serviço de usuários da aplicação,
-incluindo operações de CRUD e regras de negócio específicas.
+Este módulo implementa os casos de uso relacionados a usuários,
+orquestrando as operações entre a API e o domínio.
 """
-from typing import List, Optional
-from uuid import UUID
-from sqlalchemy.orm import Session
+from dataclasses import dataclass
+from typing import Optional, List
+
+import bcrypt
 
 from ...domain.identity.entities.usuario import Usuario
+from ...domain.identity.repositories.usuario_repository import IUsuarioRepository
 from ...domain.shared.value_objects.email import Email
-from ...infrastructure.persistence.sqlalchemy.repositories.usuario_repository import UsuarioRepository
-from ..identity.auth_service import AuthService
+
+
+@dataclass
+class CriarUsuarioDTO:
+    """DTO para criação de usuário."""
+    nome: str
+    email: str
+    senha: str
+
+
+@dataclass
+class UsuarioDTO:
+    """DTO para retorno de usuário."""
+    id: str
+    nome: str
+    email: str
+    ativo: bool
+    data_criacao: str
 
 
 class UserService:
     """
-    Serviço de usuários.
-
-    Esta classe implementa a lógica de negócio relacionada
-    a usuários, incluindo:
-    - Criação de usuários
-    - Atualização de dados
-    - Busca e listagem
-    - Remoção de usuários
+    Serviço de aplicação para gerenciamento de usuários.
+    
+    Esta classe implementa os casos de uso relacionados a usuários,
+    como criação, consulta, atualização e remoção.
     """
-
-    def __init__(self, db: Session):
+    
+    def __init__(self, usuario_repository: IUsuarioRepository):
         """
-        Inicializa o serviço de usuários.
-
+        Inicializa o serviço com suas dependências.
+        
         Args:
-            db: Sessão do banco de dados
+            usuario_repository: Repositório de usuários
         """
-        self.db = db
-        self.usuario_repository = UsuarioRepository(db)
-        self.auth_service = AuthService(db)
-
-    def create_user(
-        self,
-        email: Email,
-        nome: str,
-        senha: str,
-        empresa_id: Optional[UUID] = None
-    ) -> Usuario:
+        self._repository = usuario_repository
+        
+    def criar_usuario(self, dados: CriarUsuarioDTO) -> UsuarioDTO:
         """
-        Cria um novo usuário.
-
+        Cria um novo usuário no sistema.
+        
+        Este método implementa o caso de uso US1, realizando:
+        1. Validação dos dados de entrada
+        2. Verificação de unicidade do email
+        3. Hash da senha
+        4. Persistência do usuário
+        
         Args:
-            email: Email do usuário
-            nome: Nome do usuário
-            senha: Senha em texto plano
-            empresa_id: ID da empresa (opcional)
-
+            dados: DTO com os dados do usuário
+            
         Returns:
-            Usuario: Usuário criado
-
+            DTO com os dados do usuário criado
+            
         Raises:
-            ValueError: Se houver erro de validação
+            ValueError: Se os dados forem inválidos ou o email já existir
         """
-        # Verifica se já existe usuário com o mesmo email
-        existing = self.usuario_repository.buscar_por_email(email)
-        if existing:
-            raise ValueError("Email já cadastrado")
-
-        # Cria o usuário
+        # Cria o objeto de valor Email (já valida o formato)
+        email = Email(dados.email)
+        
+        # Verifica se o email já existe
+        if self._repository.buscar_por_email(email):
+            raise ValueError(f"Email já cadastrado: {dados.email}")
+            
+        # Gera o hash da senha
+        senha_hashed = bcrypt.hashpw(
+            dados.senha.encode("utf-8"),
+            bcrypt.gensalt()
+        ).decode("utf-8")
+        
+        # Cria e persiste o usuário
         usuario = Usuario(
-            id=self.usuario_repository.proximo_id(),
+            nome=dados.nome,
             email=email,
-            nome=nome,
-            senha_hash=self.auth_service.get_password_hash(senha),
-            empresa_id=empresa_id
+            senha_hashed=senha_hashed
         )
-
-        return self.usuario_repository.salvar(usuario)
-
-    def get_user(self, user_id: str) -> Optional[Usuario]:
+        
+        usuario = self._repository.criar(usuario)
+        
+        # Retorna o DTO
+        return UsuarioDTO(
+            id=str(usuario.id),
+            nome=usuario.nome,
+            email=str(usuario.email),
+            ativo=usuario.ativo,
+            data_criacao=usuario.data_criacao.isoformat()
+        )
+        
+    def buscar_usuario(self, id: str) -> Optional[UsuarioDTO]:
         """
         Busca um usuário pelo ID.
-
+        
         Args:
-            user_id: ID do usuário
-
+            id: ID do usuário
+            
         Returns:
-            Optional[Usuario]: Usuário encontrado ou None
+            DTO com os dados do usuário ou None
         """
-        return self.usuario_repository.buscar_por_id(UUID(user_id))
-
-    def get_user_by_email(self, email: Email) -> Optional[Usuario]:
-        """
-        Busca um usuário pelo email.
-
-        Args:
-            email: Email do usuário
-
-        Returns:
-            Optional[Usuario]: Usuário encontrado ou None
-        """
-        return self.usuario_repository.buscar_por_email(email)
-
-    def list_users(
-        self,
-        empresa_id: Optional[UUID] = None,
-        skip: int = 0,
-        limit: int = 100,
-        search: Optional[str] = None
-    ) -> List[Usuario]:
-        """
-        Lista usuários com filtros.
-
-        Args:
-            empresa_id: ID da empresa para filtrar
-            skip: Número de registros para pular
-            limit: Número máximo de registros
-            search: Termo de busca
-
-        Returns:
-            List[Usuario]: Lista de usuários
-        """
-        return self.usuario_repository.listar(apenas_ativos=True)
-
-    def update_user(
-        self,
-        user_id: str,
-        email: Optional[Email] = None,
-        nome: Optional[str] = None,
-        senha: Optional[str] = None
-    ) -> Usuario:
-        """
-        Atualiza os dados de um usuário.
-
-        Args:
-            user_id: ID do usuário
-            email: Novo email
-            nome: Novo nome
-            senha: Nova senha
-
-        Returns:
-            Usuario: Usuário atualizado
-
-        Raises:
-            ValueError: Se houver erro de validação
-        """
-        usuario = self.usuario_repository.buscar_por_id(UUID(user_id))
+        usuario = self._repository.buscar_por_id(id)
+        
         if not usuario:
-            raise ValueError("Usuário não encontrado")
-
-        if email:
-            # Verifica se o novo email já está em uso
-            existing = self.usuario_repository.buscar_por_email(email)
-            if existing and existing.id != usuario.id:
-                raise ValueError("Email já cadastrado")
-            usuario.atualizar_email(email)
-
-        if nome:
-            usuario.atualizar_nome(nome)
-
-        if senha:
-            senha_hash = self.auth_service.get_password_hash(senha)
-            usuario.atualizar_senha(senha_hash)
-
-        return self.usuario_repository.salvar(usuario)
-
-    def delete_user(self, user_id: str) -> None:
+            return None
+            
+        return UsuarioDTO(
+            id=str(usuario.id),
+            nome=usuario.nome,
+            email=str(usuario.email),
+            ativo=usuario.ativo,
+            data_criacao=usuario.data_criacao.isoformat()
+        )
+        
+    def listar_usuarios(
+        self,
+        pagina: int = 1,
+        tamanho: int = 10,
+        email: Optional[str] = None,
+        nome: Optional[str] = None
+    ) -> List[UsuarioDTO]:
         """
-        Remove um usuário.
-
+        Lista usuários com paginação e filtros opcionais.
+        
         Args:
-            user_id: ID do usuário
-
-        Raises:
-            ValueError: Se o usuário não for encontrado
+            pagina: Número da página
+            tamanho: Tamanho da página
+            email: Filtro por email
+            nome: Filtro por nome
+            
+        Returns:
+            Lista de DTOs de usuário
         """
-        usuario = self.usuario_repository.buscar_por_id(UUID(user_id))
-        if not usuario:
-            raise ValueError("Usuário não encontrado")
-
-        usuario.desativar()
-        self.usuario_repository.salvar(usuario) 
+        usuarios = self._repository.listar(
+            pagina=pagina,
+            tamanho=tamanho,
+            email=email,
+            nome=nome
+        )
+        
+        return [
+            UsuarioDTO(
+                id=str(u.id),
+                nome=u.nome,
+                email=str(u.email),
+                ativo=u.ativo,
+                data_criacao=u.data_criacao.isoformat()
+            )
+            for u in usuarios
+        ] 

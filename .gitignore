@@ -22,43 +22,34 @@ wheels/
 
 # Virtual Environment
 venv/
-env/
 ENV/
+env/
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
-.project
-.pydevproject
-.settings/
-
-# Testing
-.coverage
-htmlcov/
-.pytest_cache/
-.tox/
-coverage.xml
-*.cover
-.hypothesis/
-
-# Logs
-*.log
-logs/
+.DS_Store
 
 # Environment variables
 .env
 .env.*
 
+# Logs
+*.log
+logs/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
 # Database
-*.db
 *.sqlite3
+*.db
 
-# Documentation
-docs/_build/
-site/
-
-# Misc
-.DS_Store
-Thumbs.db 
+# Alembic
+versions/ 

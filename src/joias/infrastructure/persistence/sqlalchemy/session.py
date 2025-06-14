@@ -1,26 +1,22 @@
 """
-Configuração da sessão do SQLAlchemy.
+Configuração da sessão SQLAlchemy.
 
-Este módulo configura a conexão com o banco de dados e
-fornece funções para gerenciar sessões do SQLAlchemy.
+Este módulo configura e fornece a sessão do SQLAlchemy
+para acesso ao banco de dados.
 """
-import os
 from typing import Generator
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
-# Obtém a URL do banco de dados das variáveis de ambiente
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://postgres:postgres@localhost:5432/joias"
-)
+from ....settings import Settings
+
 
 # Cria o engine do SQLAlchemy
 engine = create_engine(
-    DATABASE_URL,
-    pool_pre_ping=True,  # Verifica conexão antes de usar
-    pool_size=5,         # Tamanho do pool de conexões
-    max_overflow=10      # Máximo de conexões extras
+    Settings.DATABASE_URL,
+    pool_pre_ping=True,
+    echo=Settings.DEBUG
 )
 
 # Cria a fábrica de sessões
@@ -34,12 +30,12 @@ SessionLocal = sessionmaker(
 def get_db() -> Generator[Session, None, None]:
     """
     Retorna uma sessão do banco de dados.
-
-    Esta função é usada como dependência no FastAPI para
+    
+    Esta função é usada como dependência do FastAPI para
     injetar sessões do banco de dados nos endpoints.
-
+    
     Yields:
-        Session: Sessão do banco de dados
+        Uma sessão do SQLAlchemy
     """
     db = SessionLocal()
     try:

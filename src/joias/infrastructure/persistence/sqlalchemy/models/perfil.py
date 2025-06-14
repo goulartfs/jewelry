@@ -1,43 +1,26 @@
 """
-Modelo SQLAlchemy para perfis.
-
-Este módulo define o modelo de perfis usando
-SQLAlchemy como ORM.
+Modelo SQLAlchemy para Perfil.
 """
-from datetime import datetime
-from uuid import UUID
-
-from sqlalchemy import Column, DateTime, String, Table, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID as PgUUID
+from sqlalchemy import Column, DateTime, String
 from sqlalchemy.orm import relationship
 
-from src.joias.infrastructure.persistence.sqlalchemy.base import Base
+from ..base import Base
+from .perfil_permissao import perfil_permissao
 
 
-# Tabela de associação entre usuários e perfis
-usuario_perfil = Table(
-    "usuario_perfil",
-    Base.metadata,
-    Column("usuario_id", PgUUID(as_uuid=True), ForeignKey("usuario.id"), primary_key=True),
-    Column("perfil_id", PgUUID(as_uuid=True), ForeignKey("perfil.id"), primary_key=True),
-)
+class PerfilModel(Base):
+    """Modelo SQLAlchemy para Perfil."""
 
+    __tablename__ = "perfis"
 
-class Perfil(Base):
-    """Modelo SQLAlchemy para perfis."""
-
-    __tablename__ = "perfil"
-
-    id = Column(PgUUID(as_uuid=True), primary_key=True)
+    id = Column(String(36), primary_key=True)
     nome = Column(String(100), nullable=False, unique=True)
-    descricao = Column(String(255), nullable=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    deleted_at = Column(DateTime, nullable=True)
+    descricao = Column(String(255))
+    data_criacao = Column(DateTime, nullable=False)
 
-    # Relacionamento many-to-many com usuários
-    usuarios = relationship(
-        "Usuario",
-        secondary=usuario_perfil,
+    # Relacionamentos
+    permissoes = relationship(
+        "PermissaoModel",
+        secondary=perfil_permissao,
         back_populates="perfis",
     ) 

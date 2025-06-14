@@ -1,127 +1,167 @@
 """
-Router para endpoints de perfil.
-
-Este módulo contém as rotas da API relacionadas a
-operações com perfis de usuário.
+Router para endpoints de Perfil.
 """
-from typing import List, Optional
-from uuid import UUID
+from fastapi import APIRouter, Depends, HTTPException
+from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
+from ....application.dtos.perfil import CriarPerfilDTO, PerfilDTO
+from ....application.identity.perfil_service import PerfilService
+from ....domain.repositories.perfil_repository import IPerfilRepository
+from ....domain.repositories.permissao_repository import IPermissaoRepository
+from ...dependencies import get_perfil_repository, get_permissao_repository
 
-from src.joias.application.identity.perfil_service import (
-    PerfilService,
-    CriarPerfilDTO,
-    AtualizarPerfilDTO,
-    PerfilDTO
-)
-from src.joias.infrastructure.persistence.sqlalchemy.repositories.perfil_repository import (
-    SQLPerfilRepository,
-)
-from src.joias.presentation.api.dependencies import get_db_session
-
-
-router = APIRouter(prefix="/api/perfis", tags=["Perfis"])
-
-
-class ErrorResponse(BaseModel):
-    """Modelo de resposta de erro."""
-    erro: str
-
-
-class CriarPerfilRequest(BaseModel):
-    """Modelo de requisição para criar perfil."""
-    nome: str
-    descricao: Optional[str] = None
-
-
-class PerfilResponse(BaseModel):
-    """Modelo de resposta com dados do perfil."""
-    id: UUID
-    nome: str
-    descricao: Optional[str] = None
-    created_at: str
-    updated_at: str
+router = APIRouter(prefix="/perfis", tags=["Perfis"])
 
 
 @router.post(
     "",
-    response_model=PerfilResponse,
-    status_code=status.HTTP_201_CREATED,
-    responses={
-        409: {"model": ErrorResponse, "description": "Nome de perfil já existe"},
-        400: {"model": ErrorResponse, "description": "Dados inválidos"}
-    }
+    response_model=PerfilDTO,
+    status_code=201,
+    description="Cria um novo perfil",
 )
-def criar_perfil(request: CriarPerfilRequest, session=Depends(get_db_session)):
+def criar_perfil(
+    dados: CriarPerfilDTO,
+    perfil_repository: IPerfilRepository = Depends(get_perfil_repository),
+    permissao_repository: IPermissaoRepository = Depends(get_permissao_repository),
+) -> PerfilDTO:
     """
     Cria um novo perfil.
-    
+
     Args:
-        request: Dados do perfil a ser criado
-        session: Sessão do banco de dados
-        
+        dados: Dados do perfil
+        perfil_repository: Repositório de perfis (injetado)
+        permissao_repository: Repositório de permissões (injetado)
+
     Returns:
         Dados do perfil criado
-        
+
     Raises:
-        HTTPException: Se houver erro de validação ou conflito
+        HTTPException: Se houver erro de validação
     """
     try:
-        service = PerfilService(SQLPerfilRepository(session))
-        dto = CriarPerfilDTO(
-            nome=request.nome,
-            descricao=request.descricao
-        )
-        perfil = service.criar_perfil(dto)
-        return perfil
+        service = PerfilService(perfil_repository, permissao_repository)
+        return service.criar_perfil(dados)
     except ValueError as e:
-        if "já existe" in str(e).lower():
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail={"erro": str(e)}
-            )
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"erro": str(e)}
-        )
+        raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.put(
-    "/{id}/usuarios/{usuario_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-    responses={
-        404: {"model": ErrorResponse, "description": "Perfil ou usuário não encontrado"},
-        400: {"model": ErrorResponse, "description": "Dados inválidos"}
-    }
+@router.get(
+    "/{id}",
+    response_model=PerfilDTO,
+    description="Retorna os dados de um perfil específico",
 )
-def associar_usuario(
-    id: UUID,
-    usuario_id: UUID,
-    session=Depends(get_db_session)
-):
+def buscar_perfil(
+    id: str,
+    perfil_repository: IPerfilRepository = Depends(get_perfil_repository),
+    permissao_repository: IPermissaoRepository = Depends(get_permissao_repository),
+) -> PerfilDTO:
     """
-    Associa um usuário a um perfil.
-    
+    Busca um perfil pelo ID.
+
     Args:
         id: ID do perfil
-        usuario_id: ID do usuário
-        session: Sessão do banco de dados
-        
+        perfil_repository: Repositório de perfis (injetado)
+        permissao_repository: Repositório de permissões (injetado)
+
+    Returns:
+        Dados do perfil
+
     Raises:
-        HTTPException: Se houver erro de validação ou recurso não encontrado
+        HTTPException: Se o perfil não for encontrado
+    """
+    service = PerfilService(perfil_repository, permissao_repository)
+    perfil = service.buscar_perfil(id)
+
+    if not perfil:
+        raise HTTPException(status_code=404, detail="Perfil não encontrado")
+
+    return perfil
+
+
+@router.get(
+    "",
+    response_model=List[PerfilDTO],
+    description="Lista todos os perfis",
+)
+def listar_perfis(
+    perfil_repository: IPerfilRepository = Depends(get_perfil_repository),
+    permissao_repository: IPermissaoRepository = Depends(get_permissao_repository),
+) -> List[PerfilDTO]:
+    """
+    Lista todos os perfis.
+
+    Args:
+        perfil_repository: Repositório de perfis (injetado)
+        permissao_repository: Repositório de permissões (injetado)
+
+    Returns:
+        Lista de perfis
+    """
+    service = PerfilService(perfil_repository, permissao_repository)
+    return service.listar_perfis()
+
+
+@router.post(
+    "/{perfil_id}/permissoes/{permissao_id}",
+    response_model=PerfilDTO,
+    description="Adiciona uma permissão a um perfil",
+)
+def adicionar_permissao(
+    perfil_id: str,
+    permissao_id: str,
+    perfil_repository: IPerfilRepository = Depends(get_perfil_repository),
+    permissao_repository: IPermissaoRepository = Depends(get_permissao_repository),
+) -> PerfilDTO:
+    """
+    Adiciona uma permissão a um perfil.
+
+    Args:
+        perfil_id: ID do perfil
+        permissao_id: ID da permissão
+        perfil_repository: Repositório de perfis (injetado)
+        permissao_repository: Repositório de permissões (injetado)
+
+    Returns:
+        Dados do perfil atualizado
+
+    Raises:
+        HTTPException: Se o perfil ou a permissão não forem encontrados
     """
     try:
-        service = PerfilService(SQLPerfilRepository(session))
-        service.associar_usuario(id, usuario_id)
+        service = PerfilService(perfil_repository, permissao_repository)
+        return service.adicionar_permissao(perfil_id, permissao_id)
     except ValueError as e:
-        if "não encontrado" in str(e).lower():
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail={"erro": str(e)}
-            )
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"erro": str(e)}
-        ) 
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.delete(
+    "/{perfil_id}/permissoes/{permissao_id}",
+    response_model=PerfilDTO,
+    description="Remove uma permissão de um perfil",
+)
+def remover_permissao(
+    perfil_id: str,
+    permissao_id: str,
+    perfil_repository: IPerfilRepository = Depends(get_perfil_repository),
+    permissao_repository: IPermissaoRepository = Depends(get_permissao_repository),
+) -> PerfilDTO:
+    """
+    Remove uma permissão de um perfil.
+
+    Args:
+        perfil_id: ID do perfil
+        permissao_id: ID da permissão
+        perfil_repository: Repositório de perfis (injetado)
+        permissao_repository: Repositório de permissões (injetado)
+
+    Returns:
+        Dados do perfil atualizado
+
+    Raises:
+        HTTPException: Se o perfil ou a permissão não forem encontrados
+    """
+    try:
+        service = PerfilService(perfil_repository, permissao_repository)
+        return service.remover_permissao(perfil_id, permissao_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) 
